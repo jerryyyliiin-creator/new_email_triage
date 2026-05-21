@@ -1,5 +1,5 @@
 {
-  "timeZone": "America/Vancouver",
+  "timeZone": "America/Toronto",
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
@@ -12,11 +12,13 @@
     "https://www.googleapis.com/auth/script.external_request",
     "https://www.googleapis.com/auth/script.scriptapp",
     "https://www.googleapis.com/auth/script.send_mail",
-    "https://www.googleapis.com/auth/gmail.addons.execute"
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/calendar"
   ],
   "urlFetchWhitelist": [
     "https://api.anthropic.com/",
-    "https://people.googleapis.com/"
+    "https://people.googleapis.com/",
+    "https://www.googleapis.com/calendar/"
   ],
   "webapp": {
     "executeAs": "USER_DEPLOYING",
@@ -24,8 +26,8 @@
   },
   "addOns": {
     "common": {
-      "name": "New Inbox Triage",
-      "logoUrl": "https://forex-brokers.ca/wp-content/uploads/2020/04/questrade-broker-forex-canada.png",
+      "name": "Inbox Triage",
+      "logoUrl": "https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png",
       "homepageTrigger": {
         "runFunction": "onHomepage"
       }
