@@ -1,0 +1,4510 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triage — Inbox</title>
+<base target="_top">
+<style>/* =========================================================================
+   Triage — glassmorphic dark/green (matches original aesthetic)
+   ========================================================================= */
+
+:root {
+  /* Accent — green, exposed as a hue tweak */
+  --accent-h: 162;
+  --accent: #00c896;
+  --accent-2: #2de8a0;
+  --accent-soft: rgba(0, 200, 150, 0.16);
+  --accent-bg: rgba(0, 200, 150, 0.08);
+  --accent-glow: 0 0 40px rgba(0, 200, 150, 0.16);
+
+  /* Category colors */
+  --c-escalation: #ff4d4d;
+  --c-action:     #ff8c42;
+  --c-calendar:   #00c04b;
+  --c-fyi:        #5b9cf6;
+  --c-low:        #909090;
+
+  --r-lg: 22px;
+  --r-md: 18px;
+  --r-sm: 14px;
+  --blur: 26px;
+
+  --density: 1;
+  --row-pad-y: calc(12px * var(--density));
+  --row-pad-x: 16px;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+/* ============================================================
+   DARK (default) — glassmorphic, deep navy-black, green accent
+   ============================================================ */
+:root[data-theme="dark"] {
+  --bg:           #070a0e;
+  --bg-base:      #070a0e;
+  --s1:           rgba(255,255,255,0.09);
+  --s2:           rgba(255,255,255,0.14);
+  --s3:           rgba(255,255,255,0.20);
+  --border:       rgba(255,255,255,0.16);
+  --hairline:     rgba(255,255,255,0.28);
+  --fg:           #f0f4f2;
+  --fg-mute:      rgba(220,240,235,0.72);
+  --fg-dim:       rgba(200,225,218,0.45);
+  --hover:        rgba(255,255,255,0.06);
+  --selected:     rgba(0,200,150,0.12);
+  --bg-rail:      rgba(255,255,255,0.03);
+  --bg-elev:      rgba(255,255,255,0.05);
+  --bg-elev-2:    rgba(255,255,255,0.09);
+  --line:         rgba(255,255,255,0.16);
+  --line-soft:    rgba(255,255,255,0.08);
+  --shadow:       0 22px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+/* LIGHT — Liquid Glass: neutral, frosted, minimal color */
+:root[data-theme="light"] {
+  --bg:           #f5f5f7;
+  --bg-base:      #f5f5f7;
+  --s1:           rgba(255,255,255,0.55);
+  --s2:           rgba(255,255,255,0.75);
+  --s3:           rgba(255,255,255,0.92);
+  --border:       rgba(0,0,0,0.08);
+  --hairline:     rgba(255,255,255,0.9);
+  --fg:           #1d1d1f;
+  --fg-mute:      rgba(29,29,31,0.62);
+  --fg-dim:       rgba(29,29,31,0.38);
+  --hover:        rgba(0,0,0,0.04);
+  --selected:     rgba(0,0,0,0.05);
+  --bg-rail:      rgba(255,255,255,0.45);
+  --bg-elev:      rgba(255,255,255,0.65);
+  --bg-elev-2:    rgba(255,255,255,0.88);
+  --line:         rgba(0,0,0,0.08);
+  --line-soft:    rgba(0,0,0,0.04);
+  --accent:       #1d1d1f;
+  --accent-2:     #2d2d30;
+  --accent-soft:  rgba(29,29,31,0.08);
+  --shadow:
+    0 1px 1px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* HIGH CONTRAST */
+:root[data-theme="hc"] {
+  --bg: #000; --bg-base: #000;
+  --s1: rgba(255,255,255,0.12); --s2: rgba(255,255,255,0.2); --s3: rgba(255,255,255,0.32);
+  --border: #2a2a2a; --hairline: #444;
+  --fg: #fff; --fg-mute: #d0d0d0; --fg-dim: #888;
+  --hover: #1a1a1a; --selected: rgba(0,200,150,0.22);
+  --bg-rail: #050505; --bg-elev: #0a0a0a; --bg-elev-2: #141414;
+  --line: #2a2a2a; --line-soft: #1a1a1a;
+  --shadow: none;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0,200,150,0.07), transparent 32%),
+    radial-gradient(circle at 90% 100%, rgba(0,200,150,0.05), transparent 30%),
+    linear-gradient(135deg, #050709 0%, #070a0e 55%, #090d12 100%);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-feature-settings: "ss01", "cv11";
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,0.8), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(220,220,225,0.6), transparent 40%),
+    linear-gradient(180deg, #f5f5f7 0%, #ececef 100%);
+}
+:root[data-theme="hc"] body { background: #000; }
+
+/* Ambient glow orbs (decorative) */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(10px);
+}
+body::before {
+  width: 520px; height: 520px;
+  left: -180px; top: 90px;
+  background: radial-gradient(circle, rgba(0,200,150,0.09), transparent 66%);
+}
+body::after {
+  width: 620px; height: 620px;
+  right: -260px; bottom: -220px;
+  background: radial-gradient(circle, rgba(0,200,150,0.08), transparent 64%);
+}
+:root[data-theme="light"] body::before {
+  background: radial-gradient(circle, rgba(180,200,220,0.4), transparent 66%);
+}
+:root[data-theme="light"] body::after {
+  background: radial-gradient(circle, rgba(220,200,210,0.35), transparent 64%);
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+input, textarea, select { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+#root { height: 100vh; }
+
+/* ============ Reusable glass surfaces ============ */
+.glass {
+  background: linear-gradient(135deg, var(--s2), var(--s1));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--blur)) saturate(1.55);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.55);
+}
+
+/* ====== App shell ====== */
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr 420px;
+  height: 100vh;
+  overflow: hidden;
+  gap: 0;
+}
+.shell.no-right { grid-template-columns: 240px 1fr; }
+.shell.focus { grid-template-columns: 1fr; }
+
+/* ====== Left rail ====== */
+.rail {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(var(--blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+}
+.rail-head {
+  padding: 22px 20px 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.brand-mark {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  position: relative;
+  display: grid; place-items: center;
+  color: #04140d;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.04em;
+  overflow: hidden;
+  box-shadow:
+    0 12px 28px rgba(0,200,150,0.32),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.brand-mark:has(img) {
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.brand-mark:has(img)::after { display: none; }
+.brand-mark::after {
+  content: "";
+  position: absolute; top: 6px; right: 6px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #04140d;
+  opacity: 0.7;
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name { font-weight: 800; letter-spacing: -0.01em; font-size: 15px; }
+.brand-sub { font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); letter-spacing: 0.04em; margin-top: 2px; }
+
+.rail-section { padding: 14px 12px 4px; }
+.rail-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  padding: 0 8px 8px;
+}
+.rail-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  color: var(--fg-mute);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  border: 1px solid transparent;
+  transition: background .15s, color .15s, border-color .15s, transform .15s;
+}
+.rail-item:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  color: var(--fg);
+  border-color: rgba(255,255,255,0.08);
+}
+.rail-item.active {
+  background: linear-gradient(135deg, rgba(0,200,150,0.18), rgba(0,200,150,0.06));
+  color: var(--fg);
+  border-color: rgba(0,200,150,0.28);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 0 30px rgba(0,200,150,0.08);
+}
+.rail-item.active .rail-dot { background: var(--accent-2); box-shadow: 0 0 12px var(--accent); }
+.rail-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--fg-dim);
+  flex-shrink: 0;
+  transition: background .15s, box-shadow .15s;
+}
+.rail-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+}
+.rail-item.active .rail-count {
+  color: var(--accent-2);
+  background: rgba(0,200,150,0.16);
+}
+
+.rail-foot {
+  margin-top: auto;
+  padding: 14px;
+  border-top: 1px solid var(--line-soft);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  color: var(--fg-mute);
+  background: rgba(255,255,255,0.02);
+}
+.user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  font-weight: 800;
+  font-size: 11px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(0,200,150,0.22), inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+/* ====== Main column ====== */
+.main {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--line-soft);
+  flex-shrink: 0;
+  min-height: 64px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(var(--blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+  position: relative;
+  z-index: 5;
+}
+.topbar-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 16px rgba(255,255,255,0.1);
+}
+.topbar-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+
+.search {
+  flex: 1; max-width: 420px;
+  display: flex; align-items: center; gap: 10px;
+  margin-left: auto;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--fg-mute);
+  transition: border-color .15s, box-shadow .15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.search:focus-within {
+  border-color: rgba(0,200,150,0.5);
+  box-shadow: 0 0 0 3px rgba(0,200,150,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.search input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 13px; color: var(--fg);
+}
+.search-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.icon-btn {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: background .15s, color .15s, transform .15s, border-color .15s;
+}
+.icon-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+  color: var(--fg);
+  border-color: var(--hairline);
+  transform: translateY(-1px);
+}
+
+/* Stats strip */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  padding: 18px 22px 8px;
+}
+.stat {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5);
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s, border-color .18s, background .18s;
+  display: flex; flex-direction: column; gap: 6px;
+  align-items: center;
+  text-align: center;
+}
+.stat::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent 38%, rgba(255,255,255,0.06) 62%, transparent);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.stat:hover, .stat.active {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--c) 55%, white 35%);
+  box-shadow:
+    0 20px 52px rgba(0,0,0,0.24),
+    0 0 0 1px color-mix(in srgb, var(--c) 50%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.32);
+  background: linear-gradient(145deg, rgba(255,255,255,0.24), rgba(255,255,255,0.08));
+}
+.stat-num {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--c);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.stat-num.zero { color: var(--fg-dim); }
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-mute);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.stat-label::before { display: none; }
+
+/* Attention banner — slim variant */
+.attention-banner {
+  margin: 4px 22px 0;
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(255,140,66,0.18), rgba(255,77,77,0.10));
+  border: 1px solid rgba(255,180,110,0.32);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow), 0 0 46px rgba(255,140,66,0.10);
+  cursor: pointer;
+  transition: transform .18s, border-color .18s;
+  position: relative;
+  overflow: hidden;
+}
+.attention-banner::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255,140,66,0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,0.18), transparent 38%, rgba(255,255,255,0.04));
+  pointer-events: none;
+}
+.attention-banner:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,180,110,0.5);
+}
+.attention-pulse {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--c-escalation);
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1;
+  box-shadow: 0 0 14px rgba(255,77,77,0.6);
+}
+.attention-pulse::before {
+  content: "";
+  position: absolute; inset: -5px;
+  border-radius: 50%;
+  background: var(--c-escalation);
+  opacity: 0.4;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%   { transform: scale(0.6); opacity: 0.6; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+.attention-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; z-index: 1; }
+.attention-title { font-size: 14px; font-weight: 700; }
+.attention-sub {
+  font-size: 11px;
+  color: var(--fg-mute);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.attention-go {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-mute);
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  background: rgba(255,255,255,0.06);
+  z-index: 1;
+}
+
+/* Tab bar */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 22px 0;
+  padding: 5px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
+  border-radius: 999px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--fg-mute);
+  border-radius: 999px;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid transparent;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.tab:hover { color: var(--fg); background: rgba(255,255,255,0.04); }
+.tab.active {
+  background: linear-gradient(135deg, rgba(0,200,150,0.22), rgba(255,255,255,0.1));
+  border-color: rgba(0,200,150,0.32);
+  color: var(--accent-2);
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.tab-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.tab.active .tab-count { color: var(--accent-2); border-color: rgba(0,200,150,0.4); }
+
+/* Email list */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 22px 60px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.list-section-label {
+  padding: 16px 4px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+  text-shadow: 0 1px 12px rgba(255,255,255,0.08);
+}
+.list-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+.row {
+  position: relative;
+  overflow: hidden;
+  padding: var(--row-pad-y) var(--row-pad-x);
+  background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+  border: 1px solid var(--border);
+  border-left: 1px solid color-mix(in srgb, var(--c) 70%, white 10%);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 18px 40px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 76px;
+  transition: transform .18s, box-shadow .18s, border-color .18s, background .18s;
+  animation: rise .24s ease both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to   { opacity: 1; transform: none; }
+}
+.row::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 12px; bottom: 12px;
+  width: 3px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom, transparent, var(--c), transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--c) 55%, transparent);
+  pointer-events: none;
+}
+.row:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+  border-color: color-mix(in srgb, var(--c) 35%, var(--hairline));
+  box-shadow:
+    0 26px 80px rgba(0,0,0,0.34),
+    0 0 0 1px rgba(255,255,255,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.34);
+}
+.row.selected {
+  background: linear-gradient(145deg, rgba(0,200,150,0.18), rgba(0,200,150,0.06));
+  border-color: rgba(0,200,150,0.4);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.28), 0 0 32px rgba(0,200,150,0.12), inset 0 1px 0 rgba(255,255,255,0.24);
+}
+.row.unread .row-subject { font-weight: 700; color: var(--fg); }
+.row.unread .row-dot { background: var(--accent); }
+
+.row-check {
+  width: 18px; height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,0.04);
+  transition: background .12s, border-color .12s;
+}
+.row-check:hover { border-color: var(--hairline); }
+.row-check.checked {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border-color: rgba(255,255,255,0.55);
+  color: #04140d;
+  box-shadow: 0 4px 12px rgba(0,200,150,0.32);
+}
+.row-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: transparent;
+  justify-self: center;
+}
+.row-avatar {
+  width: 38px; height: 38px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0.07));
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 12px 24px rgba(0,0,0,0.16);
+  display: grid; place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--fg);
+  flex-shrink: 0;
+  position: relative;
+}
+.row-avatar.vip::after {
+  content: "★";
+  position: absolute;
+  top: -4px; right: -4px;
+  font-size: 11px;
+  color: #ffcf5a;
+  text-shadow: 0 0 8px rgba(255,207,90,0.5);
+}
+.row-body { min-width: 0; }
+.row-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row-sender {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--fg-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.row-cat-dot {
+  width: 7px; height: 7px;
+  border-radius: 2px;
+  background: var(--c);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 60%, transparent);
+  flex-shrink: 0;
+}
+.row-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  margin-left: auto;
+}
+.row-subject-line {
+  display: flex; align-items: baseline; gap: 8px;
+  min-width: 0;
+  margin-top: 3px;
+}
+.row-subject {
+  font-size: 14px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  font-weight: 600;
+}
+.row-preview {
+  color: var(--fg-mute);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 3px;
+  min-height: 1em;
+}
+.row-preview:empty::after {
+  content: "—";
+  color: var(--fg-dim);
+}
+.row-reasons {
+  display: flex; gap: 5px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+.reason-chip {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255,176,124,0.14);
+  border: 1px solid rgba(255,176,124,0.26);
+  color: #ffb07c;
+  font-weight: 800;
+}
+.reason-chip.critical { background: rgba(255,77,77,0.14); border-color: rgba(255,77,77,0.3); color: #ff8585; }
+.reason-chip.deadline { background: rgba(255,140,66,0.14); border-color: rgba(255,140,66,0.3); color: #ffb07c; }
+.reason-chip.vip      { background: rgba(255,207,90,0.14); border-color: rgba(255,207,90,0.3); color: #ffd97a; }
+
+.row-actions {
+  position: relative;
+  display: flex; gap: 3px;
+  padding: 4px 5px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 14px 30px rgba(0,0,0,0.16);
+  backdrop-filter: blur(18px) saturate(1.35);
+  -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  opacity: 0.45;
+  transition: opacity .15s, border-color .15s;
+}
+.row:hover .row-actions, .row.selected .row-actions { opacity: 1; }
+.row-action {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--fg-mute);
+  font-size: 12px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.row-action:hover { background: rgba(255,255,255,0.16); }
+.row-action.resolve:hover { color: var(--accent-2); border-color: rgba(0,200,150,0.45); }
+.row-action.trash:hover { color: #ff8585; border-color: rgba(255,77,77,0.45); }
+.row-action.snooze:hover { color: #ffb07c; border-color: rgba(255,176,124,0.45); }
+
+/* Batch action bar */
+.batch-bar {
+  margin: 12px 22px 0;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(0,200,150,0.18), rgba(0,200,150,0.05));
+  border: 1px solid rgba(0,200,150,0.3);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; gap: 12px;
+  animation: rise .15s ease-out;
+  box-shadow: var(--shadow), 0 0 32px rgba(0,200,150,0.1);
+}
+.batch-count { font-size: 13px; font-weight: 700; }
+.batch-btn {
+  font-size: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+  display: flex; align-items: center; gap: 6px;
+  transition: background .15s, color .15s, border-color .15s, transform .15s;
+}
+.batch-btn:hover {
+  color: var(--fg);
+  border-color: var(--hairline);
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.07));
+  transform: translateY(-1px);
+}
+.batch-btn.primary {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  border-color: rgba(255,255,255,0.5);
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(0,200,150,0.32), inset 0 1px 0 rgba(255,255,255,0.65);
+}
+.batch-btn.primary:hover { background: linear-gradient(135deg, #c3ffe0, var(--accent-2)); }
+.batch-spacer { flex: 1; }
+
+/* ====== Right context pane ====== */
+.context {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border-left: 1px solid var(--border);
+  backdrop-filter: blur(var(--blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.4);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.04);
+}
+.context-tabs {
+  display: flex;
+  padding: 12px 14px 0;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.context-tab {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 12px;
+  color: var(--fg-mute);
+  border-radius: 10px 10px 0 0;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.context-tab:hover { color: var(--fg); background: rgba(255,255,255,0.04); }
+.context-tab.active {
+  background: linear-gradient(180deg, rgba(0,200,150,0.18), rgba(0,200,150,0.06));
+  border-color: rgba(0,200,150,0.32);
+  color: var(--accent-2);
+  font-weight: 700;
+}
+.context-tab-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+}
+.context-tab.active .context-tab-count { color: var(--accent-2); }
+
+.context-body {
+  flex: 1; overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+
+/* Thread view */
+.thread {
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.thread-head {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.thread-subject {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.thread-meta {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.thread-meta-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 50%, var(--border));
+  border-radius: 999px;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.thread-msg {
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.thread-msg-head { display: flex; align-items: center; gap: 9px; }
+.thread-msg-avatar {
+  width: 26px; height: 26px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.14);
+  display: grid; place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--fg);
+}
+.thread-msg-from { font-size: 12px; font-weight: 750; }
+.thread-msg-time { font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); margin-left: auto; }
+.thread-msg-body { font-size: 13px; line-height: 1.65; color: var(--fg-mute); white-space: pre-wrap; }
+
+.thread-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding-top: 8px;
+}
+.thread-btn {
+  padding: 9px 16px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg);
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+  display: flex; align-items: center; gap: 7px;
+  transition: background .15s, border-color .15s, transform .15s;
+  font-weight: 650;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.thread-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0.1));
+  border-color: var(--hairline);
+  transform: translateY(-1px);
+}
+.thread-btn.primary {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  border-color: rgba(255,255,255,0.5);
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(0,200,150,0.28), inset 0 1px 0 rgba(255,255,255,0.65);
+}
+.thread-btn.primary:hover { background: linear-gradient(135deg, #c3ffe0, var(--accent-2)); }
+.thread-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.empty-context {
+  flex: 1;
+  display: grid; place-items: center;
+  padding: 40px;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+.empty-context-mark {
+  width: 56px; height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  margin: 0 auto 14px;
+  font-size: 20px;
+  color: var(--fg-mute);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* Draft pane */
+.draft {
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.draft-subject {
+  font-size: 14px; font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.draft-to {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-mute);
+  margin-top: 5px;
+}
+.draft-tones {
+  display: flex; gap: 4px;
+  padding: 4px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: fit-content;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.draft-tone {
+  padding: 6px 14px;
+  font-size: 11px;
+  border-radius: 999px;
+  color: var(--fg-mute);
+  transition: background .15s, color .15s;
+  font-weight: 650;
+}
+.draft-tone:hover { color: var(--fg); }
+.draft-tone.active {
+  background: linear-gradient(135deg, rgba(0,200,150,0.22), rgba(255,255,255,0.1));
+  color: var(--accent-2);
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+.draft-area {
+  width: 100%;
+  min-height: 200px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--fg);
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  font-family: var(--font-ui);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.draft-area:focus {
+  border-color: rgba(0,200,150,0.56);
+  box-shadow: 0 0 0 3px rgba(0,200,150,0.1), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.draft-streaming { color: var(--fg-mute); }
+.draft-streaming::after {
+  content: "▋";
+  color: var(--accent-2);
+  animation: blink 1s infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.quick-replies {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.quick-reply {
+  font-size: 11px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  transition: background .15s, color .15s, border-color .15s, transform .15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.quick-reply:hover {
+  background: linear-gradient(135deg, rgba(0,200,150,0.18), rgba(0,200,150,0.04));
+  color: var(--accent-2);
+  border-color: rgba(0,200,150,0.32);
+  transform: translateY(-1px);
+}
+
+.draft-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  flex-wrap: wrap;
+}
+.draft-foot .spacer { flex: 1; }
+
+/* ── Draft AI chat refine ────────────────────────── */
+.draft-chat {
+  margin-top: 6px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.draft-chat-head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.draft-chat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg);
+  display: flex; align-items: center; gap: 7px;
+  letter-spacing: 0.01em;
+}
+.draft-chat-spark {
+  display: inline-grid; place-items: center;
+  width: 18px; height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  font-size: 11px;
+  box-shadow: 0 4px 10px rgba(0,200,150,0.28);
+}
+.draft-chat-history {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.chat-msg {
+  display: flex; gap: 8px; align-items: flex-start;
+  animation: rise .2s ease both;
+}
+.chat-msg-avatar {
+  width: 22px; height: 22px;
+  border-radius: 7px;
+  display: grid; place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  color: var(--fg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+}
+.chat-msg-claude .chat-msg-avatar {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  border-color: transparent;
+  box-shadow: 0 4px 10px rgba(0,200,150,0.22), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.chat-msg-bubble {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  color: var(--fg-mute);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  word-break: break-word;
+}
+.chat-msg-user .chat-msg-bubble {
+  background: rgba(0,200,150,0.1);
+  border-color: rgba(0,200,150,0.24);
+  color: var(--fg);
+}
+.chat-thinking { display: flex; gap: 4px; padding: 10px 12px; }
+.chat-thinking span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--fg-mute);
+  animation: chatDot 1.4s ease-in-out infinite both;
+}
+.chat-thinking span:nth-child(2) { animation-delay: 0.16s; }
+.chat-thinking span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes chatDot {
+  0%, 80%, 100% { transform: scale(0.5); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.draft-chat-suggestions {
+  display: flex; gap: 5px; flex-wrap: wrap;
+}
+.draft-chat-input {
+  display: flex; gap: 6px; align-items: center;
+  padding: 6px 6px 6px 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: border-color .15s, box-shadow .15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.draft-chat-input:focus-within {
+  border-color: rgba(0,200,150,0.45);
+  box-shadow: 0 0 0 3px rgba(0,200,150,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.draft-chat-input input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 12px; color: var(--fg);
+}
+.draft-chat-input input::placeholder { color: var(--fg-dim); }
+.chat-send-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  font-size: 14px;
+  font-weight: 900;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(0,200,150,0.32), inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+}
+.chat-send-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.chat-send-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+:root[data-theme="light"] .draft-chat-spark,
+:root[data-theme="light"] .chat-msg-claude .chat-msg-avatar,
+:root[data-theme="light"] .chat-send-btn {
+  background: linear-gradient(135deg, #2d2d30, #1d1d1f);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+:root[data-theme="light"] .chat-msg-user .chat-msg-bubble {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+  color: var(--fg);
+}
+:root[data-theme="light"] .chat-msg-bubble {
+  background: #fff;
+  border-color: rgba(0,0,0,0.08);
+}
+:root[data-theme="light"] .draft-chat-input:focus-within {
+  border-color: rgba(0,122,255,0.45);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* Tasks pane */
+.tasks-list { padding: 12px 22px; display: flex; flex-direction: column; gap: 0; }
+.task {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.task:last-child { border-bottom: none; }
+.task-check {
+  width: 18px; height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  margin-top: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  transition: background .15s, border-color .15s;
+}
+.task-check:hover { border-color: var(--hairline); }
+.task-check.done {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border-color: rgba(255,255,255,0.55);
+  color: #04140d;
+  box-shadow: 0 4px 12px rgba(0,200,150,0.32);
+}
+.task-body { min-width: 0; }
+.task-text { font-size: 13px; line-height: 1.4; font-weight: 600; }
+.task.done .task-text { text-decoration: line-through; color: var(--fg-dim); font-weight: 500; }
+.task-meta {
+  display: flex; gap: 10px; align-items: center;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+  letter-spacing: 0.02em;
+  flex-wrap: wrap;
+}
+.task-pri {
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 800;
+  border: 1px solid var(--border);
+  letter-spacing: 0.06em;
+}
+.task-pri.high   { color: #ff8585; border-color: rgba(255,77,77,0.4); background: rgba(255,77,77,0.08); }
+.task-pri.medium { color: #ffb07c; border-color: rgba(255,140,66,0.4); background: rgba(255,140,66,0.08); }
+.task-pri.low    { color: var(--fg-dim); }
+.task-source { color: var(--fg-mute); }
+
+/* VIPs + Follow-ups pane */
+.tracker-section { padding: 16px 22px; border-bottom: 1px solid var(--line-soft); }
+.tracker-section:last-child { border-bottom: none; }
+.tracker-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px;
+}
+.tracker-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.tracker-add {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-mute);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  transition: background .15s, color .15s, border-color .15s;
+}
+.tracker-add:hover {
+  color: var(--accent-2);
+  border-color: rgba(0,200,150,0.3);
+  background: rgba(0,200,150,0.08);
+}
+
+.vip-row, .followup-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.vip-row:last-child, .followup-row:last-child { border-bottom: none; }
+.vip-avatar {
+  width: 30px; height: 30px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--fg);
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+}
+.vip-avatar::after {
+  content: "★";
+  position: absolute;
+  top: -4px; right: -4px;
+  font-size: 10px;
+  color: #ffcf5a;
+  text-shadow: 0 0 6px rgba(255,207,90,0.5);
+}
+.followup-row .vip-avatar::after { display: none; }
+.vip-name, .followup-to { font-size: 13px; font-weight: 700; }
+.vip-meta, .followup-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+  margin-top: 2px;
+}
+.followup-due {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-mute);
+  background: rgba(255,255,255,0.05);
+  letter-spacing: 0.04em;
+}
+.followup-due.overdue {
+  color: #ff8585;
+  border-color: rgba(255,77,77,0.4);
+  background: rgba(255,77,77,0.1);
+  font-weight: 800;
+}
+
+/* ====== Command palette ====== */
+.cmdk-overlay {
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0,200,150,0.07), transparent 42%), rgba(5,8,12,0.65);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  display: grid; place-items: start center;
+  padding-top: 12vh;
+  z-index: 200;
+  animation: fadeIn .15s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.cmdk {
+  width: 100%;
+  max-width: 580px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 34px 90px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.26);
+  backdrop-filter: blur(34px) saturate(1.6);
+  -webkit-backdrop-filter: blur(34px) saturate(1.6);
+  overflow: hidden;
+  animation: cmdkIn .18s ease-out;
+}
+@keyframes cmdkIn { from { transform: scale(0.96) translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.cmdk-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 18px 22px;
+  font-size: 15px;
+  color: var(--fg);
+  border-bottom: 1px solid var(--line-soft);
+}
+.cmdk-input::placeholder { color: var(--fg-dim); }
+.cmdk-results { max-height: 380px; overflow-y: auto; padding: 8px 0; }
+.cmdk-group-label {
+  padding: 10px 18px 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+}
+.cmdk-item {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 13px;
+  border: 1px solid transparent;
+  margin: 0 8px;
+  border-radius: 12px;
+}
+.cmdk-item.active {
+  background: linear-gradient(135deg, rgba(0,200,150,0.22), rgba(0,200,150,0.06));
+  border-color: rgba(0,200,150,0.32);
+}
+.cmdk-item-icon { color: var(--fg-mute); font-size: 13px; }
+.cmdk-item-label { color: var(--fg); }
+.cmdk-item-meta { font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); }
+.cmdk-kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-mute);
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.06);
+}
+.cmdk-foot {
+  padding: 10px 18px;
+  border-top: 1px solid var(--line-soft);
+  display: flex; gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+}
+.cmdk-foot span { display: flex; align-items: center; gap: 5px; }
+
+/* ====== Focus mode ====== */
+.focus-stage {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.focus-head {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex; align-items: center; gap: 12px;
+  backdrop-filter: blur(var(--blur));
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+}
+.focus-progress {
+  flex: 1;
+  display: flex; gap: 3px;
+}
+.focus-pip {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+}
+.focus-pip.done { background: var(--accent); box-shadow: 0 0 8px var(--accent-soft); }
+.focus-pip.current { background: var(--accent-2); box-shadow: 0 0 14px var(--accent); }
+
+.focus-card-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+  width: 100%;
+}
+.focus-card {
+  max-width: 640px;
+  width: 100%;
+  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5);
+}
+.focus-from { display: flex; align-items: center; gap: 12px; }
+.focus-avatar {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07));
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 13px; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+  flex-shrink: 0;
+}
+.focus-from-name { font-size: 13px; font-weight: 700; }
+.focus-from-meta { font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); margin-top: 2px; }
+.focus-subject { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+.focus-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-mute);
+  white-space: pre-wrap;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  max-height: 240px;
+  overflow-y: auto;
+}
+.focus-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--line-soft);
+  display: flex; gap: 6px; align-items: center; justify-content: center;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+}
+.focus-foot-btn {
+  padding: 8px 14px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: flex; align-items: center; gap: 6px;
+  color: var(--fg);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+  transition: background .15s, border-color .15s, transform .15s;
+  font-weight: 650;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+.focus-foot-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.06));
+  border-color: var(--hairline);
+  transform: translateY(-1px);
+}
+.focus-foot-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.focus-foot-btn.primary {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #04140d;
+  border-color: rgba(255,255,255,0.5);
+  font-weight: 800;
+  box-shadow: 0 14px 32px rgba(0,200,150,0.28), inset 0 1px 0 rgba(255,255,255,0.65);
+}
+.focus-kbd-hint { font-family: var(--font-mono); font-size: 9px; color: var(--fg-dim); letter-spacing: 0.04em; opacity: 0.7; }
+
+/* ====== Toast ====== */
+.toast-wrap {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.07));
+  border: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(1.45);
+  -webkit-backdrop-filter: blur(24px) saturate(1.45);
+  color: var(--fg);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 18px 48px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.22);
+  display: flex; align-items: center; gap: 12px;
+  animation: toastIn .2s ease-out;
+}
+@keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.toast-undo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-2);
+  padding: 3px 10px;
+  border: 1px solid rgba(0,200,150,0.4);
+  border-radius: 999px;
+  background: rgba(0,200,150,0.1);
+  font-weight: 800;
+}
+.toast-undo:hover { background: rgba(0,200,150,0.18); }
+
+/* Row dismissing animation */
+.row.dismissing {
+  animation: slideOut .25s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes slideOut {
+  0%   { opacity: 1; transform: translateX(0); }
+  70%  { opacity: 0; transform: translateX(42px); }
+  100% { opacity: 0; max-height: 0; padding: 0; margin: 0; border-width: 0; overflow: hidden; }
+}
+
+/* Empty state */
+.list-empty {
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--fg-mute);
+}
+.list-empty-icon { font-size: 40px; margin-bottom: 14px; opacity: 0.5; }
+.list-empty-title { font-size: 15px; font-weight: 800; color: var(--fg); margin-bottom: 6px; }
+.list-empty-sub { font-size: 13px; color: var(--fg-dim); }
+
+/* Motion-less */
+:root[data-motion="off"] *,
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+}
+
+/* Density */
+:root[data-density="compact"] {
+  --row-pad-y: 8px;
+}
+:root[data-density="compact"] .row { grid-template-columns: 16px 30px 1fr auto; gap: 10px; }
+:root[data-density="compact"] .row-avatar { width: 30px; height: 30px; font-size: 10px; border-radius: 10px; }
+:root[data-density="compact"] .row-subject { font-size: 13px; }
+:root[data-density="compact"] .row-preview { font-size: 11px; }
+:root[data-density="compact"] .list { gap: 4px; }
+
+/* Attention hero (alt) */
+.attention-hero {
+  margin: 4px 22px 0;
+  padding: 22px 24px;
+  background: linear-gradient(145deg, rgba(255,140,66,0.22), rgba(255,77,77,0.10));
+  border: 1px solid rgba(255,180,110,0.35);
+  border-radius: var(--r-lg);
+  display: flex; align-items: center; gap: 22px;
+  box-shadow: var(--shadow), 0 0 60px rgba(255,140,66,0.14);
+  position: relative;
+  overflow: hidden;
+}
+.attention-hero::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255,140,66,0.22), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,0.26), transparent 40%, rgba(255,255,255,0.04));
+  pointer-events: none;
+}
+.attention-hero-num {
+  font-size: 44px;
+  font-weight: 900;
+  color: #ffb07c;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  z-index: 1;
+}
+.attention-hero-body { flex: 1; z-index: 1; }
+.attention-hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #ffb07c;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.attention-hero-title { font-size: 18px; font-weight: 850; margin-bottom: 5px; letter-spacing: -0.01em; }
+.attention-hero-sub { font-size: 12px; color: var(--fg-mute); font-family: var(--font-mono); letter-spacing: 0.02em; }
+
+/* Tweaks panel stacking */
+[data-comment-anchor="tweaks-panel"] { z-index: 80 !important; }
+
+/* ============================================================
+   LIGHT MODE OVERRIDES — neutral Liquid Glass surface tinting,
+   replace green-accent treatments with refined charcoal.
+   ============================================================ */
+:root[data-theme="light"] .brand-mark {
+  background: linear-gradient(135deg, #2d2d30, #1d1d1f);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+:root[data-theme="light"] .brand-mark::after { background: #fff; opacity: 0.5; }
+:root[data-theme="light"] .user-avatar {
+  background: linear-gradient(135deg, #3d3d40, #1d1d1f);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+:root[data-theme="light"] .rail-item.active {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.08);
+  color: var(--fg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+:root[data-theme="light"] .rail-item.active .rail-dot {
+  background: var(--fg);
+  box-shadow: none;
+}
+:root[data-theme="light"] .rail-item.active .rail-count {
+  color: var(--fg);
+  background: rgba(0,0,0,0.06);
+}
+:root[data-theme="light"] .row.selected {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+:root[data-theme="light"] .row.unread .row-dot { background: #007aff; }
+:root[data-theme="light"] .tab.active {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.08);
+  color: var(--fg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+:root[data-theme="light"] .tab.active .tab-count {
+  color: var(--fg);
+  border-color: rgba(0,0,0,0.08);
+}
+:root[data-theme="light"] .thread-btn.primary,
+:root[data-theme="light"] .batch-btn.primary,
+:root[data-theme="light"] .focus-foot-btn.primary {
+  background: linear-gradient(135deg, #2d2d30, #1d1d1f);
+  color: #fff;
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+:root[data-theme="light"] .thread-btn.primary:hover,
+:root[data-theme="light"] .batch-btn.primary:hover,
+:root[data-theme="light"] .focus-foot-btn.primary:hover {
+  background: linear-gradient(135deg, #3d3d40, #2d2d30);
+}
+:root[data-theme="light"] .context-tab.active {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.08);
+  color: var(--fg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+}
+:root[data-theme="light"] .context-tab.active .context-tab-count { color: var(--fg); }
+:root[data-theme="light"] .draft-tone.active {
+  background: rgba(255,255,255,0.95);
+  color: var(--fg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+:root[data-theme="light"] .draft-area:focus {
+  border-color: rgba(0,122,255,0.4);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+:root[data-theme="light"] .search:focus-within {
+  border-color: rgba(0,122,255,0.4);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+:root[data-theme="light"] .row-check.checked,
+:root[data-theme="light"] .task-check.done {
+  background: linear-gradient(135deg, #2d2d30, #1d1d1f);
+  border-color: rgba(255,255,255,0.6);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+:root[data-theme="light"] .row-action.resolve:hover {
+  color: var(--fg);
+  border-color: rgba(0,0,0,0.16);
+}
+:root[data-theme="light"] .quick-reply:hover {
+  background: rgba(255,255,255,0.95);
+  color: var(--fg);
+  border-color: rgba(0,0,0,0.12);
+}
+:root[data-theme="light"] .toast {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  color: var(--fg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+:root[data-theme="light"] .toast-undo {
+  color: var(--fg);
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+}
+:root[data-theme="light"] .toast-undo:hover { background: rgba(0,0,0,0.08); }
+:root[data-theme="light"] .batch-bar {
+  background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+  border-color: rgba(0,0,0,0.1);
+}
+:root[data-theme="light"] .cmdk-item.active {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.08);
+}
+:root[data-theme="light"] .focus-pip.done { background: var(--fg); box-shadow: none; }
+:root[data-theme="light"] .focus-pip.current { background: var(--fg); box-shadow: none; }
+:root[data-theme="light"] .reason-chip.critical { background: rgba(255,69,58,0.08); border-color: rgba(255,69,58,0.2); color: #c8302a; }
+:root[data-theme="light"] .reason-chip.deadline { background: rgba(255,149,0,0.08); border-color: rgba(255,149,0,0.2); color: #b56500; }
+:root[data-theme="light"] .reason-chip.vip { background: rgba(204,153,0,0.08); border-color: rgba(204,153,0,0.2); color: #8a6800; }
+:root[data-theme="light"] .row-avatar.vip::after { color: #b58900; text-shadow: none; }
+:root[data-theme="light"] .vip-avatar::after { color: #b58900; text-shadow: none; }
+:root[data-theme="light"] .followup-due.overdue { color: #c8302a; border-color: rgba(255,69,58,0.25); background: rgba(255,69,58,0.06); }
+:root[data-theme="light"] .task-pri.high { color: #c8302a; border-color: rgba(255,69,58,0.25); background: rgba(255,69,58,0.06); }
+:root[data-theme="light"] .task-pri.medium { color: #b56500; border-color: rgba(255,149,0,0.25); background: rgba(255,149,0,0.06); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script>/* Mock data — three scenarios. Each scenario is a list of email objects.
+   Categories: escalation | action_required | calendar | fyi | low_priority
+   Reasons feed the attention banner.
+*/
+
+const SCENARIOS = {
+  busy: {
+    label: "Busy day",
+    sub: "31 unread · 7 need attention",
+    emails: [
+      {
+        id: "e1",
+        sender: "Priya Raghavan",
+        email: "priya.r@acme-capital.com",
+        avatar: "PR",
+        company: "Acme Capital",
+        subject: "URGENT: Trade execution failing for institutional client",
+        preview: "We've had 3 failed trades in the last hour on the Helix platform. Client is escalating to their compliance team. Need an answer within 30 minutes.",
+        time: "8m ago",
+        timestamp: Date.now() - 8 * 60_000,
+        category: "escalation",
+        priority: 5,
+        unread: true,
+        reasons: ["Critical", "Direct ask", "Deadline"],
+        vip: true,
+        thread: [
+          { from: "Priya Raghavan", text: "We've had 3 failed trades in the last hour on the Helix platform. Client is escalating to their compliance team. Need an answer within 30 minutes.\n\nAttaching execution logs and the error code we're seeing. Can you loop in the platform team?\n\nThis is impacting our top 5 institutional account.", time: "8:42 AM" }
+        ],
+      },
+      {
+        id: "e2",
+        sender: "Marcus Chen",
+        email: "m.chen@board.acme.com",
+        avatar: "MC",
+        company: "Board",
+        subject: "Re: Q3 risk review — your slides for Thursday",
+        preview: "Can you push a draft to me by EOD tomorrow? I want to walk through with the chair before the full board sees it.",
+        time: "42m ago",
+        timestamp: Date.now() - 42 * 60_000,
+        category: "action_required",
+        priority: 4,
+        unread: true,
+        reasons: ["Direct ask", "Deadline", "VIP"],
+        vip: true,
+        thread: [
+          { from: "Marcus Chen", text: "Can you push a draft to me by EOD tomorrow? I want to walk through with the chair before the full board sees it.\n\nFocus areas the chair flagged:\n• Counterparty concentration in the prop book\n• How we're stress-testing the new options flow\n• Vendor risk on the Helix migration\n\nDoesn't need to be polished — bullets are fine.", time: "8:08 AM" }
+        ],
+      },
+      {
+        id: "e3",
+        sender: "Sasha Lindqvist",
+        email: "sasha@platform.internal",
+        avatar: "SL",
+        subject: "Helix v4.2 rollout — sign-off needed by Friday",
+        preview: "Need your go/no-go for the v4.2 release. QA cleared on Monday and we want to ship before the long weekend. Specifically need approval on the new options chain UI.",
+        time: "1h ago",
+        timestamp: Date.now() - 60 * 60_000,
+        category: "action_required",
+        priority: 4,
+        unread: true,
+        reasons: ["Direct ask", "Deadline"],
+        thread: [
+          { from: "Sasha Lindqvist", text: "Need your go/no-go for the v4.2 release. QA cleared on Monday and we want to ship before the long weekend. Specifically need approval on the new options chain UI.\n\nLinks:\n• Staging build\n• QA sign-off doc\n• Risk team's note (they're fine)\n\nIf you can drop a 👍 in this thread we'll start the deploy at 2pm.", time: "7:51 AM" }
+        ],
+      },
+      {
+        id: "e4",
+        sender: "Anita Bose",
+        email: "anita@regreview.gov",
+        avatar: "AB",
+        subject: "Disclosure filing — response required",
+        preview: "Following up on our request from May 14. We need your written response on the Form 31-103 amendments by next Wednesday at the latest.",
+        time: "2h ago",
+        timestamp: Date.now() - 2 * 3600_000,
+        category: "action_required",
+        priority: 5,
+        unread: true,
+        reasons: ["Critical", "Deadline", "Direct ask"],
+        thread: [
+          { from: "Anita Bose", text: "Following up on our request from May 14. We need your written response on the Form 31-103 amendments by next Wednesday at the latest.\n\nIf we don't have a response by then we'll need to schedule a formal meeting.\n\nReply-all on this thread is fine, or you can reach me directly at the number below.", time: "6:30 AM" }
+        ],
+      },
+      {
+        id: "e5",
+        sender: "Calendar",
+        email: "calendar-notification@google.com",
+        avatar: "📅",
+        subject: "Invitation: Risk standup @ 9:30 AM",
+        preview: "Recurring weekly standup. 6 attendees. Conference Room — 8th Floor or join via Meet.",
+        time: "3h ago",
+        timestamp: Date.now() - 3 * 3600_000,
+        category: "calendar",
+        priority: 2,
+        reasons: ["Today"],
+        thread: [
+          { from: "Calendar", text: "When: Today, 9:30 – 10:00 AM\nWhere: Conference Room 8B (or join via Meet)\nAttendees: Marcus, Priya, Sasha, Anita, J. Tao, you\n\nAgenda:\n• Helix v4.2 status\n• Outstanding incidents from yesterday\n• Q3 risk review prep", time: "5:18 AM" }
+        ],
+      },
+      {
+        id: "e6",
+        sender: "Jordan Tao",
+        email: "jtao@acme.com",
+        avatar: "JT",
+        subject: "Lunch Thursday? Quick catch-up",
+        preview: "Free for a quick lunch Thursday? Want to bounce some ideas about the new team structure.",
+        time: "4h ago",
+        timestamp: Date.now() - 4 * 3600_000,
+        category: "action_required",
+        priority: 2,
+        reasons: ["Direct ask"],
+        thread: [
+          { from: "Jordan Tao", text: "Free for a quick lunch Thursday? Want to bounce some ideas about the new team structure.\n\nNo pressure if you're slammed — happy to push to next week.", time: "4:12 AM" }
+        ],
+      },
+      {
+        id: "e7",
+        sender: "Helix Platform",
+        email: "alerts@helix.dev",
+        avatar: "🛠",
+        subject: "Incident #4421 — resolved",
+        preview: "The execution latency spike on EU-West-2 has been mitigated. Root cause: stale connection pool to the order matcher. Post-mortem doc linked.",
+        time: "5h ago",
+        timestamp: Date.now() - 5 * 3600_000,
+        category: "fyi",
+        priority: 2,
+        thread: [
+          { from: "Helix Platform", text: "The execution latency spike on EU-West-2 has been mitigated. Root cause: stale connection pool to the order matcher. Post-mortem doc linked.\n\n• Duration: 14 minutes\n• Affected: ~1,200 retail orders, ~40 institutional\n• Mitigation: rolling restart + connection pool retune\n• Post-mortem: 2pm Thursday in #incidents", time: "3:14 AM" }
+        ],
+      },
+      {
+        id: "e8",
+        sender: "Diana Park",
+        email: "diana@portfolio.internal",
+        avatar: "DP",
+        subject: "Weekly portfolio snapshot — Week 21",
+        preview: "Standard weekly. AUM up 2.3%, net inflows positive across all desks. Three accounts flagged for the wealth team to review.",
+        time: "6h ago",
+        timestamp: Date.now() - 6 * 3600_000,
+        category: "fyi",
+        priority: 1,
+        thread: [
+          { from: "Diana Park", text: "Standard weekly. AUM up 2.3%, net inflows positive across all desks. Three accounts flagged for the wealth team to review.\n\nFull dashboard linked. No action needed from you unless the flagged accounts come up in the Friday review.", time: "2:00 AM" }
+        ],
+      },
+      {
+        id: "e9",
+        sender: "Leon Vasquez",
+        email: "leon@vendor-success.com",
+        avatar: "LV",
+        company: "Vendor",
+        subject: "Following up — pricing for Q4 expansion",
+        preview: "Wanted to make sure my note from last week didn't get lost. Happy to chat or drop a one-pager if easier.",
+        time: "8h ago",
+        timestamp: Date.now() - 8 * 3600_000,
+        category: "low_priority",
+        priority: 1,
+        thread: [
+          { from: "Leon Vasquez", text: "Wanted to make sure my note from last week didn't get lost. Happy to chat or drop a one-pager if easier.\n\nNo pressure on timing — just keeping it on your radar.", time: "Yesterday, 11pm" }
+        ],
+      },
+      {
+        id: "e10",
+        sender: "Stripe",
+        email: "receipts@stripe.com",
+        avatar: "$",
+        subject: "Your monthly invoice — May 2026",
+        preview: "Invoice for the May billing period is ready. Total: $14,820.00. Automatically charged to ending 4421.",
+        time: "10h ago",
+        timestamp: Date.now() - 10 * 3600_000,
+        category: "low_priority",
+        priority: 1,
+        thread: [
+          { from: "Stripe", text: "Invoice for the May billing period is ready. Total: $14,820.00. Automatically charged to ending 4421.\n\nDownload invoice from your dashboard. Tax receipts are attached to the next statement.", time: "Yesterday, 9pm" }
+        ],
+      },
+      {
+        id: "e11",
+        sender: "Maya Okafor",
+        email: "maya.o@acme.com",
+        avatar: "MO",
+        subject: "Quick favour — intro to your contact at Velocity?",
+        preview: "Saw you connected with Reema at Velocity last month. Mind making an intro? Working on something I think would be relevant for her team.",
+        time: "11h ago",
+        timestamp: Date.now() - 11 * 3600_000,
+        category: "action_required",
+        priority: 2,
+        reasons: ["Direct ask"],
+        thread: [
+          { from: "Maya Okafor", text: "Saw you connected with Reema at Velocity last month. Mind making an intro? Working on something I think would be relevant for her team.\n\nHappy to draft the intro myself if it's easier — just need your green light.", time: "Yesterday, 8pm" }
+        ],
+      },
+      {
+        id: "e12",
+        sender: "Calendar",
+        email: "calendar-notification@google.com",
+        avatar: "📅",
+        subject: "Reschedule: 1:1 with Marcus — moved to Wednesday",
+        preview: "Your recurring 1:1 with Marcus Chen has been moved from Tuesday 4pm to Wednesday 11am.",
+        time: "13h ago",
+        timestamp: Date.now() - 13 * 3600_000,
+        category: "calendar",
+        priority: 1,
+      },
+      {
+        id: "e13",
+        sender: "TechCrunch",
+        email: "newsletter@tcrunch.com",
+        avatar: "📰",
+        subject: "The Daily — fintech wrap, May 21",
+        preview: "Robinhood Q1 numbers, the SEC's new options rules, and why three fintech CEOs are sounding alarms.",
+        time: "15h ago",
+        timestamp: Date.now() - 15 * 3600_000,
+        category: "low_priority",
+        priority: 1,
+      },
+      {
+        id: "e14",
+        sender: "Hiring Bot",
+        email: "hiring@acme.com",
+        avatar: "🤖",
+        subject: "3 candidates need your feedback in Greenhouse",
+        preview: "Senior Risk Engineer pipeline — three candidates moved to your stage since yesterday. Slowing down the loop.",
+        time: "Yesterday",
+        timestamp: Date.now() - 24 * 3600_000,
+        category: "action_required",
+        priority: 3,
+        reasons: ["Direct ask"],
+      },
+      {
+        id: "e15",
+        sender: "Sasha Lindqvist",
+        email: "sasha@platform.internal",
+        avatar: "SL",
+        subject: "RE: Helix v4.2 — staging access",
+        preview: "Threading this — staging is now open at the link below. Test login: triage / triage. Let me know if you can poke around before the 2pm deploy window.",
+        time: "Yesterday",
+        timestamp: Date.now() - 26 * 3600_000,
+        category: "fyi",
+        priority: 2,
+      },
+      {
+        id: "e16",
+        sender: "Anita Bose",
+        email: "anita@regreview.gov",
+        avatar: "AB",
+        subject: "Confirmation: filing received",
+        preview: "Confirming we've received your Form 31-103 submission from April 28. We'll be in touch with the response within 14 business days.",
+        time: "Yesterday",
+        timestamp: Date.now() - 28 * 3600_000,
+        category: "fyi",
+        priority: 1,
+      },
+      {
+        id: "e17",
+        sender: "Eng Weekly",
+        email: "weekly@acme.com",
+        avatar: "🛠",
+        subject: "Eng Weekly — incidents, ships, hiring",
+        preview: "This week: Helix v4.2 cleared QA, 2 P2 incidents (both resolved), 1 P1 (Helix latency, post-mortem Thursday), 4 offers out.",
+        time: "2 days ago",
+        timestamp: Date.now() - 48 * 3600_000,
+        category: "fyi",
+        priority: 1,
+      },
+      {
+        id: "e18",
+        sender: "LinkedIn",
+        email: "no-reply@linkedin.com",
+        avatar: "in",
+        subject: "Reema Patel and 4 others endorsed you for Risk Management",
+        preview: "Your network is recognizing your skills. See who endorsed you and the skills they highlighted.",
+        time: "2 days ago",
+        timestamp: Date.now() - 50 * 3600_000,
+        category: "low_priority",
+        priority: 1,
+      },
+      {
+        id: "e19",
+        sender: "Calendar",
+        email: "calendar-notification@google.com",
+        avatar: "📅",
+        subject: "Board prep — Thursday 2pm with Marcus",
+        preview: "60 minute prep block. No agenda yet — Marcus said he'd bring questions.",
+        time: "2 days ago",
+        timestamp: Date.now() - 52 * 3600_000,
+        category: "calendar",
+        priority: 2,
+      },
+      {
+        id: "e20",
+        sender: "Notion",
+        email: "no-reply@notion.so",
+        avatar: "N",
+        subject: "5 documents shared with you this week",
+        preview: "Q3 risk review draft, vendor scorecards, the team's Helix v4.2 launch plan, and two retros.",
+        time: "3 days ago",
+        timestamp: Date.now() - 72 * 3600_000,
+        category: "low_priority",
+        priority: 1,
+      },
+    ],
+  },
+
+  quiet: {
+    label: "Quiet day",
+    sub: "9 unread · 1 needs attention",
+    emails: [
+      {
+        id: "q1",
+        sender: "Marcus Chen",
+        email: "m.chen@board.acme.com",
+        avatar: "MC",
+        subject: "Quick read on the vendor doc when you get a sec",
+        preview: "No rush — sometime this week. Wanted your read before I sign off.",
+        time: "1h ago",
+        timestamp: Date.now() - 3600_000,
+        category: "action_required",
+        priority: 3,
+        unread: true,
+        reasons: ["Direct ask", "VIP"],
+        vip: true,
+        thread: [{ from: "Marcus Chen", text: "No rush — sometime this week. Wanted your read before I sign off.\n\nIt's a five-pager. Most of the meat is in section 3.", time: "10:24 AM" }],
+      },
+      {
+        id: "q2", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
+        subject: "Lunch with Jordan — 12:30 today", preview: "Reminder: lunch with Jordan Tao at 12:30. Tonio's, Bay & King.",
+        time: "2h ago", timestamp: Date.now() - 2*3600_000, category: "calendar", priority: 2,
+      },
+      {
+        id: "q3", sender: "Diana Park", email: "diana@portfolio.internal", avatar: "DP",
+        subject: "Weekly portfolio snapshot — Week 21", preview: "Standard weekly. AUM up 2.3%, net inflows positive across all desks.",
+        time: "4h ago", timestamp: Date.now() - 4*3600_000, category: "fyi", priority: 1,
+      },
+      {
+        id: "q4", sender: "Eng Weekly", email: "weekly@acme.com", avatar: "🛠",
+        subject: "Eng Weekly — light week", preview: "Quiet week. One small ship, no incidents, two offers accepted.",
+        time: "6h ago", timestamp: Date.now() - 6*3600_000, category: "fyi", priority: 1,
+      },
+      {
+        id: "q5", sender: "Stripe", email: "receipts@stripe.com", avatar: "$",
+        subject: "Your monthly invoice — May 2026", preview: "Invoice ready. Total: $14,820.00.",
+        time: "12h ago", timestamp: Date.now() - 12*3600_000, category: "low_priority", priority: 1,
+      },
+      {
+        id: "q6", sender: "TechCrunch", email: "newsletter@tcrunch.com", avatar: "📰",
+        subject: "The Daily — fintech wrap", preview: "Robinhood Q1 numbers and the SEC's new options rules.",
+        time: "1 day ago", timestamp: Date.now() - 24*3600_000, category: "low_priority", priority: 1,
+      },
+      {
+        id: "q7", sender: "Notion", email: "no-reply@notion.so", avatar: "N",
+        subject: "2 documents shared with you", preview: "Vendor scorecards and the team's Helix v4.2 launch plan.",
+        time: "1 day ago", timestamp: Date.now() - 26*3600_000, category: "low_priority", priority: 1,
+      },
+      {
+        id: "q8", sender: "LinkedIn", email: "no-reply@linkedin.com", avatar: "in",
+        subject: "Your weekly stats", preview: "Your posts had 2,341 impressions this week — up 18%.",
+        time: "2 days ago", timestamp: Date.now() - 48*3600_000, category: "low_priority", priority: 1,
+      },
+      {
+        id: "q9", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
+        subject: "Board prep — Thursday 2pm", preview: "60 minute prep block with Marcus.",
+        time: "2 days ago", timestamp: Date.now() - 50*3600_000, category: "calendar", priority: 2,
+      },
+    ],
+  },
+
+  oncall: {
+    label: "On-call hell",
+    sub: "73 unread · 14 critical",
+    emails: [
+      {
+        id: "o1", sender: "PagerDuty", email: "alerts@pagerduty.com", avatar: "🚨",
+        subject: "INCIDENT #4438 — P1 — order matcher unhealthy",
+        preview: "Order matcher health checks failing in EU-West-2. 4 retries, all timed out. Auto-escalating to on-call.",
+        time: "2m ago", timestamp: Date.now() - 2*60_000,
+        category: "escalation", priority: 5, unread: true,
+        reasons: ["Critical", "Deadline"],
+        thread: [{ from: "PagerDuty", text: "Order matcher health checks failing in EU-West-2. 4 retries, all timed out. Auto-escalating to on-call.\n\nDashboard: linked\nRunbook: linked\nAffected: ~800 orders/sec backed up.", time: "8:58 AM" }],
+      },
+      {
+        id: "o2", sender: "Priya Raghavan", email: "priya.r@acme-capital.com", avatar: "PR",
+        subject: "URGENT: trades failing", preview: "Are you seeing this? Three failed in the last 4 minutes. Already getting client calls.",
+        time: "4m ago", timestamp: Date.now() - 4*60_000,
+        category: "escalation", priority: 5, unread: true, vip: true,
+        reasons: ["Critical", "VIP", "Direct ask"],
+        thread: [{ from: "Priya Raghavan", text: "Are you seeing this? Three failed in the last 4 minutes. Already getting client calls.", time: "8:56 AM" }],
+      },
+      {
+        id: "o3", sender: "Datadog", email: "alerts@datadog.com", avatar: "📊",
+        subject: "Alert: p99 latency > 2s on order-api", preview: "p99 latency on order-api crossed 2s threshold (currently 4.3s) for 5+ minutes.",
+        time: "6m ago", timestamp: Date.now() - 6*60_000,
+        category: "escalation", priority: 5, unread: true,
+        reasons: ["Critical", "Deadline"],
+      },
+      {
+        id: "o4", sender: "Sasha Lindqvist", email: "sasha@platform.internal", avatar: "SL",
+        subject: "Re: incident — joining war room", preview: "On the bridge. Pulling up the matcher logs now. Looks like the same pattern as last Tuesday's incident.",
+        time: "8m ago", timestamp: Date.now() - 8*60_000,
+        category: "fyi", priority: 3, unread: true,
+      },
+      {
+        id: "o5", sender: "PagerDuty", email: "alerts@pagerduty.com", avatar: "🚨",
+        subject: "INCIDENT #4437 — P2 — connection pool warnings",
+        preview: "Pre-cursor alert from 22 minutes ago — connection pool nearing capacity. Now likely related to #4438.",
+        time: "22m ago", timestamp: Date.now() - 22*60_000,
+        category: "escalation", priority: 4, unread: true,
+        reasons: ["Critical"],
+      },
+      {
+        id: "o6", sender: "Anita Bose", email: "anita@regreview.gov", avatar: "AB",
+        subject: "Trade execution failure — need incident report",
+        preview: "Our monitoring picked up the failed trades. Per the disclosure rules we'll need an incident report within 24h.",
+        time: "30m ago", timestamp: Date.now() - 30*60_000,
+        category: "action_required", priority: 5, unread: true,
+        reasons: ["Critical", "Deadline", "Direct ask"],
+      },
+      {
+        id: "o7", sender: "Marcus Chen", email: "m.chen@board.acme.com", avatar: "MC",
+        subject: "What's going on with Helix?", preview: "Getting questions from the board. Can someone send me a one-liner I can forward?",
+        time: "35m ago", timestamp: Date.now() - 35*60_000,
+        category: "action_required", priority: 5, unread: true, vip: true,
+        reasons: ["VIP", "Direct ask", "Deadline"],
+      },
+      {
+        id: "o8", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
+        subject: "Skipped: Risk standup — moved to async", preview: "Standup cancelled. Recording your notes async.",
+        time: "1h ago", timestamp: Date.now() - 3600_000,
+        category: "calendar", priority: 1,
+      },
+      {
+        id: "o9", sender: "Status page", email: "noreply@statuspage.io", avatar: "🛠",
+        subject: "Helix status — Investigating",
+        preview: "We are investigating reports of failed trade executions. Will update every 15 minutes.",
+        time: "1h ago", timestamp: Date.now() - 65*60_000,
+        category: "fyi", priority: 2,
+      },
+      {
+        id: "o10", sender: "Customer Success", email: "cs@acme.com", avatar: "CS",
+        subject: "5 client escalations queued", preview: "Five top-tier clients have called in about failed trades. CS is holding them for now.",
+        time: "1h ago", timestamp: Date.now() - 70*60_000,
+        category: "escalation", priority: 5,
+        reasons: ["Critical", "Deadline"],
+      },
+      {
+        id: "o11", sender: "Eng All Hands", email: "allhands@acme.com", avatar: "🛠",
+        subject: "Incident response — all hands on deck", preview: "All available engineers, please join the war room. Channel: #inc-4438",
+        time: "2h ago", timestamp: Date.now() - 2*3600_000,
+        category: "action_required", priority: 4,
+      },
+      {
+        id: "o12", sender: "TechCrunch", email: "newsletter@tcrunch.com", avatar: "📰",
+        subject: "The Daily", preview: "Today in fintech.",
+        time: "3h ago", timestamp: Date.now() - 3*3600_000,
+        category: "low_priority", priority: 1,
+      },
+      {
+        id: "o13", sender: "Notion", email: "no-reply@notion.so", avatar: "N",
+        subject: "Doc shared: runbook v3", preview: "Sasha shared the updated matcher runbook.",
+        time: "4h ago", timestamp: Date.now() - 4*3600_000,
+        category: "fyi", priority: 2,
+      },
+      {
+        id: "o14", sender: "Stripe", email: "receipts@stripe.com", avatar: "$",
+        subject: "Monthly invoice", preview: "Invoice ready.",
+        time: "6h ago", timestamp: Date.now() - 6*3600_000,
+        category: "low_priority", priority: 1,
+      },
+    ],
+  },
+};
+
+const VIPS = [
+  { name: "Marcus Chen",     email: "m.chen@board.acme.com",    role: "Board chair",       last: "42m ago" },
+  { name: "Priya Raghavan",  email: "priya.r@acme-capital.com", role: "Top inst. client",  last: "8m ago" },
+  { name: "Anita Bose",      email: "anita@regreview.gov",      role: "Regulator",         last: "2h ago" },
+  { name: "@acme.com",       email: "@acme.com",                role: "Internal — domain", last: "—" },
+];
+
+const FOLLOWUPS = [
+  { id: "f1", to: "Reema Patel",      subject: "Re: Velocity partnership next steps", sent: "8 days ago", due: "Overdue 3 days", overdue: true },
+  { id: "f2", to: "Leon Vasquez",     subject: "Re: Q4 pricing",                       sent: "5 days ago", due: "Due tomorrow",   overdue: false },
+  { id: "f3", to: "Hiring committee", subject: "Re: senior risk eng offer",            sent: "2 days ago", due: "Due in 3 days",  overdue: false },
+];
+
+const TASKS = [
+  { id: "t1", text: "Approve Helix v4.2 release",                    priority: "high",   due: "Friday",     source: "Sasha Lindqvist", done: false },
+  { id: "t2", text: "Send Q3 risk review draft to Marcus",           priority: "high",   due: "EOD tomorrow", source: "Marcus Chen",   done: false },
+  { id: "t3", text: "Respond to Form 31-103 amendments",             priority: "high",   due: "Next Wed",   source: "Anita Bose",      done: false },
+  { id: "t4", text: "Intro Maya to Reema at Velocity",               priority: "medium", due: "This week",  source: "Maya Okafor",     done: false },
+  { id: "t5", text: "Review 3 candidates in Greenhouse",             priority: "medium", due: "This week",  source: "Hiring Bot",      done: false },
+  { id: "t6", text: "Confirm lunch with Jordan Thursday",            priority: "low",    due: "—",          source: "Jordan Tao",      done: true  },
+];
+
+window.SCENARIOS = SCENARIOS;
+window.VIPS = VIPS;
+window.FOLLOWUPS = FOLLOWUPS;
+window.TASKS = TASKS;
+</script>
+<script type="text/babel" data-presets="react">
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  // Auto-inject a rail toggle when a <deck-stage> is on the page. The
+  // toggle drives the deck's per-viewer _railVisible via window message;
+  // state is mirrored from the same localStorage key the deck reads so
+  // the control reflects reality across reloads. The mechanism is the
+  // message — authors who want custom placement can post it directly
+  // and pass noDeckControls to suppress this one.
+  const hasDeckStage = React.useMemo(
+    () => typeof document !== 'undefined' && !!document.querySelector('deck-stage'),
+    [],
+  );
+  // deck-stage enables its rail in connectedCallback, but this panel can
+  // mount before that element has upgraded. The initial read catches the
+  // common case; the listener covers mounting first. (Older deck-stage.js
+  // copies still wait for the host's __omelette_rail_enabled postMessage —
+  // same listener handles those.)
+  const [railEnabled, setRailEnabled] = React.useState(
+    () => hasDeckStage && !!document.querySelector('deck-stage')?._railEnabled,
+  );
+  React.useEffect(() => {
+    if (!hasDeckStage || railEnabled) return undefined;
+    const onMsg = (e) => {
+      if (e.data && e.data.type === '__omelette_rail_enabled') setRailEnabled(true);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [hasDeckStage, railEnabled]);
+  const [railVisible, setRailVisible] = React.useState(() => {
+    try { return localStorage.getItem('deck-stage.railVisible') !== '0'; } catch (e) { return true; }
+  });
+  const toggleRail = (on) => {
+    setRailVisible(on);
+    window.postMessage({ type: '__deck_rail_visible', on }, '*');
+  };
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-noncommentable=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+          {hasDeckStage && railEnabled && !noDeckControls && (
+            <TweakSection label="Deck">
+              <TweakToggle label="Thumbnail rail" value={railVisible} onChange={toggleRail} />
+            </TweakSection>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+</script>
+<script type="text/babel" data-presets="react">/* Left rail — brand + workspace nav */
+
+const Rail = ({ view, setView, totals, user, logoUrl }) => {
+  const name = (user && user.name) || "You";
+  const email = (user && user.email) || "—";
+  const initials = name.split(/\s+/).filter(Boolean).map(p => p[0]).join("").slice(0, 2).toUpperCase() || "·";
+  return (
+    <aside className="rail">
+      <div className="rail-head">
+        <div className="brand-mark">
+          {logoUrl
+            ? <img src={logoUrl} alt="Logo" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:"inherit"}} />
+            : "T"}
+        </div>
+        <div className="brand-text">
+          <span className="brand-name">Triage</span>
+          <span className="brand-sub">v0.4 · prototype</span>
+        </div>
+      </div>
+
+      <div className="rail-section">
+        <div className="rail-label">Workspace</div>
+        {[
+          ["inbox", "Inbox", totals.inbox],
+          ["attention", "Attention", totals.attention],
+          ["tasks", "Tasks", totals.tasks],
+          ["vips", "VIPs & follow-ups", totals.vipFollow],
+          ["resolved", "Resolved", totals.resolved],
+          ["trashed", "Trashed", totals.trashed],
+        ].map(([k, label, n]) => (
+          <button
+            key={k}
+            className={`rail-item ${view === k ? "active" : ""}`}
+            onClick={() => setView(k)}
+          >
+            <span className="rail-dot" />
+            <span>{label}</span>
+            {n > 0 && <span className="rail-count">{n}</span>}
+          </button>
+        ))}
+      </div>
+
+      <div className="rail-foot">
+        <div className="user-avatar">{initials}</div>
+        <div style={{display:"flex",flexDirection:"column",lineHeight:1.2,minWidth:0,flex:1}}>
+          <span style={{fontSize:12,fontWeight:600,color:"var(--fg)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{name}</span>
+          <span style={{fontSize:10,color:"var(--fg-dim)",fontFamily:"var(--font-mono)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{email}</span>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+window.Rail = Rail;
+</script>
+<script type="text/babel" data-presets="react">/* Email list — stats, attention banner, tabs, rows, batch bar */
+
+const CAT_LABEL = {
+  escalation: "Escalation",
+  action_required: "Action",
+  calendar: "Calendar",
+  fyi: "FYI",
+  low_priority: "Low",
+};
+const CAT_VAR = {
+  escalation: "var(--c-escalation)",
+  action_required: "var(--c-action)",
+  calendar: "var(--c-calendar)",
+  fyi: "var(--c-fyi)",
+  low_priority: "var(--c-low)",
+};
+const CAT_ORDER = ["escalation","action_required","calendar","fyi","low_priority"];
+
+const CATS = [
+  {k:"escalation", lbl:"Escalation"},
+  {k:"action_required", lbl:"Action"},
+  {k:"calendar", lbl:"Calendar"},
+  {k:"fyi", lbl:"FYI"},
+  {k:"low_priority", lbl:"Low"},
+];
+
+window.CAT_LABEL = CAT_LABEL;
+window.CAT_VAR = CAT_VAR;
+window.CAT_ORDER = CAT_ORDER;
+window.CATS = CATS;
+
+const reasonClass = (r) => {
+  if (r === "Critical") return "critical";
+  if (r === "Deadline") return "deadline";
+  if (r === "VIP") return "vip";
+  return "";
+};
+
+const Stats = ({ emails, activeCat, setActiveCat }) => {
+  const counts = emails.reduce((a,e) => { a[e.category] = (a[e.category]||0)+1; return a; }, {});
+  return (
+    <div className="stats">
+      {CATS.map(c => {
+        const n = counts[c.k] || 0;
+        return (
+          <button
+            key={c.k}
+            className={`stat ${activeCat === c.k ? "active" : ""}`}
+            style={{"--c": CAT_VAR[c.k]}}
+            onClick={() => setActiveCat(activeCat === c.k ? null : c.k)}
+          >
+            <span className={`stat-num ${n === 0 ? "zero" : ""}`}>{n}</span>
+            <span className="stat-label">{c.lbl}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const AttentionBanner = ({ emails, style, onClick }) => {
+  const items = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
+  if (!items.length) return null;
+  const reasons = items.reduce((a,e) => {
+    (e.reasons||[]).forEach(r => a[r] = (a[r]||0)+1);
+    return a;
+  }, {});
+  const topReasons = Object.entries(reasons).sort((a,b) => b[1]-a[1]).slice(0,3).map(([r,n]) => `${r} ${n}`).join(" · ");
+
+  if (style === "hero") {
+    return (
+      <div className="attention-hero" onClick={onClick}>
+        <span className="attention-hero-num">{items.length}</span>
+        <div className="attention-hero-body">
+          <div className="attention-hero-kicker">Today's attention queue</div>
+          <div className="attention-hero-title">{items.length} item{items.length===1?"":"s"} need your attention</div>
+          <div className="attention-hero-sub">{topReasons || "Critical, asks, deadlines, VIPs, overdue follow-ups"}</div>
+        </div>
+        <button className="thread-btn primary">Enter focus →</button>
+      </div>
+    );
+  }
+  if (style === "hidden") return null;
+
+  return (
+    <div className="attention-banner" onClick={onClick}>
+      <div className="attention-pulse" />
+      <div className="attention-text">
+        <div className="attention-title">{items.length} need your attention today</div>
+        <div className="attention-sub">{topReasons || "Critical, asks, deadlines, VIPs"}</div>
+      </div>
+      <div className="attention-go">Focus mode ⌥F</div>
+    </div>
+  );
+};
+
+const Tabs = ({ emails, activeTab, setActiveTab }) => {
+  const counts = emails.reduce((a,e) => { a[e.category] = (a[e.category]||0)+1; return a; }, {});
+  const attn = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation").length;
+  const tabs = [
+    ["all", "All", emails.length],
+    ["attention", "Attention", attn],
+    ...CATS.map(c => [c.k, c.lbl, counts[c.k] || 0]),
+  ];
+  return (
+    <div className="tabs">
+      {tabs.map(([k, label, n]) => (
+        <button
+          key={k}
+          className={`tab ${activeTab === k ? "active" : ""}`}
+          onClick={() => setActiveTab(k)}
+        >
+          <span>{label}</span>
+          <span className="tab-count">{n}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
+
+const Row = ({ email, selected, checked, onSelect, onCheck, onAction, dismissing, batchMode }) => {
+  return (
+    <div
+      className={`row ${email.unread ? "unread" : ""} ${selected ? "selected" : ""} ${dismissing ? "dismissing" : ""}`}
+      style={{"--c": CAT_VAR[email.category]}}
+      onClick={(e) => {
+        if (e.shiftKey || batchMode) { onCheck(email.id, !checked, e.shiftKey); return; }
+        onSelect(email.id);
+      }}
+    >
+      <button
+        className={`row-check ${checked ? "checked" : ""}`}
+        onClick={(e) => { e.stopPropagation(); onCheck(email.id, !checked, e.shiftKey); }}
+        aria-label="Select"
+      >
+        {checked && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+      </button>
+
+      <div className={`row-avatar ${email.vip ? "vip" : ""}`}>{email.avatar}</div>
+
+      <div className="row-body">
+        <div className="row-meta">
+          <span className="row-cat-dot" />
+          <span className="row-sender">{email.sender}</span>
+          <span className="row-time">{email.time}</span>
+        </div>
+        <div className="row-subject-line">
+          <span className="row-subject">{email.subject}</span>
+        </div>
+        <div className="row-preview">{email.preview}</div>
+        {email.reasons && email.reasons.length > 0 && (
+          <div className="row-reasons">
+            {email.reasons.map(r => (
+              <span key={r} className={`reason-chip ${reasonClass(r)}`}>{r}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="row-actions" onClick={(e) => e.stopPropagation()}>
+        <button className="row-action resolve" title="Resolve (r)" onClick={() => onAction(email.id, "resolve")}>✓</button>
+        <button className="row-action snooze" title="Snooze" onClick={() => onAction(email.id, "snooze")}>☾</button>
+        <button className="row-action trash" title="Trash (t)" onClick={() => onAction(email.id, "trash")}>🗑</button>
+      </div>
+    </div>
+  );
+};
+
+window.EmailListStats = Stats;
+window.AttentionBanner = AttentionBanner;
+window.EmailListTabs = Tabs;
+window.EmailRow = Row;
+</script>
+<script type="text/babel" data-presets="react">/* Right context pane — Thread / Draft / Tasks / VIPs+Followups */
+
+const ContextPane = ({
+  contextTab, setContextTab,
+  selectedEmail,
+  onResolve, onTrash, onSnooze,
+  tasks, toggleTask,
+  vips, followups, onAddVip, onRemoveVip,
+  draftState, onOpenDraft, onSendDraft, onUpdateDraft, onChangeTone, onChatRefine,
+}) => {
+  return (
+    <aside className="context">
+      <div className="context-tabs">
+        {[
+          ["thread", "Thread"],
+          ["draft", "Draft"],
+          ["tasks", "Tasks", tasks.filter(t => !t.done).length],
+          ["tracker", "VIPs", null],
+        ].map(([k, label, count]) => (
+          <button
+            key={k}
+            className={`context-tab ${contextTab === k ? "active" : ""}`}
+            onClick={() => setContextTab(k)}
+          >
+            <span>{label}</span>
+            {count != null && count > 0 && <span className="context-tab-count">{count}</span>}
+          </button>
+        ))}
+      </div>
+
+      <div className="context-body">
+        {contextTab === "thread" && <ThreadView email={selectedEmail} onResolve={onResolve} onTrash={onTrash} onSnooze={onSnooze} onOpenDraft={onOpenDraft} />}
+        {contextTab === "draft" && <DraftPane email={selectedEmail} draft={draftState} chat={draftState.chat} onChange={onUpdateDraft} onSend={onSendDraft} onTone={onChangeTone} onChatSend={onChatRefine} />}
+        {contextTab === "tasks" && <TasksPane tasks={tasks} toggleTask={toggleTask} />}
+        {contextTab === "tracker" && <TrackerPane vips={vips} followups={followups} onAddVip={onAddVip} onRemoveVip={onRemoveVip} />}
+      </div>
+    </aside>
+  );
+};
+
+const initialsOf = (s) => (s || "").split(/[\s@.]+/).filter(Boolean).map(p => p[0]).join("").slice(0,2).toUpperCase() || "·";
+
+const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
+  if (!email) return (
+    <div className="empty-context">
+      <div>
+        <div className="empty-context-mark">↗</div>
+        <div style={{fontWeight:600, color:"var(--fg-mute)", marginBottom:6}}>No email selected</div>
+        <div>Click a row or press <code style={{fontFamily:"var(--font-mono)",fontSize:11,background:"var(--bg)",padding:"2px 5px",border:"1px solid var(--line)",borderRadius:3}}>↵</code> to open</div>
+      </div>
+    </div>
+  );
+
+  const thread = email.thread || [{ from: email.sender, text: email.preview, time: email.time }];
+
+  return (
+    <div className="thread">
+      <div className="thread-head">
+        <div className="thread-subject">{email.subject}</div>
+        <div className="thread-meta">
+          <span className="thread-meta-pill" style={{"--c": CAT_VAR[email.category]}}>{CAT_LABEL[email.category]}</span>
+          {email.priority >= 4 && <span className="thread-meta-pill" style={{"--c": "var(--c-escalation)"}}>P{email.priority}</span>}
+          {email.vip && <span className="thread-meta-pill" style={{"--c": "oklch(0.85 0.15 80)"}}>VIP</span>}
+          {(email.reasons||[]).map(r => (
+            <span key={r} className="thread-meta-pill" style={{"--c": "var(--fg-mute)"}}>{r}</span>
+          ))}
+        </div>
+      </div>
+
+      {thread.map((m, i) => (
+        <div key={i} className="thread-msg">
+          <div className="thread-msg-head">
+            <div className="thread-msg-avatar">{initialsOf(m.from)}</div>
+            <span className="thread-msg-from">{m.from}</span>
+            <span className="thread-msg-time">{m.time}</span>
+          </div>
+          <div className="thread-msg-body">{m.text}</div>
+        </div>
+      ))}
+
+      <div className="thread-actions">
+        <button className="thread-btn primary" onClick={() => onOpenDraft(email)}>✏️ Draft reply</button>
+        <button className="thread-btn" onClick={() => onResolve(email.id)}>✓ Resolve</button>
+        <button className="thread-btn" onClick={() => onSnooze(email.id)}>☾ Snooze</button>
+        <button className="thread-btn" onClick={() => onTrash(email.id)}>🗑 Trash</button>
+      </div>
+    </div>
+  );
+};
+
+const QUICK_REPLIES = [
+  "Approved, thank you.",
+  "On it — will update you by EOD.",
+  "Can we schedule 30 min to discuss?",
+  "Thanks, noted.",
+];
+
+const DraftPane = ({ email, draft, chat, onChange, onSend, onTone, onChatSend }) => {
+  const [chatInput, setChatInput] = React.useState("");
+  if (!email) return (
+    <div className="empty-context">
+      <div>
+        <div className="empty-context-mark">✏️</div>
+        <div style={{fontWeight:600,color:"var(--fg-mute)",marginBottom:6}}>No draft active</div>
+        <div>Select an email and press <code style={{fontFamily:"var(--font-mono)",fontSize:11,background:"var(--bg)",padding:"2px 5px",border:"1px solid var(--line)",borderRadius:3}}>e</code> to draft a reply</div>
+      </div>
+    </div>
+  );
+
+  const isStreaming = draft.streaming;
+  const sendInstruction = (text) => {
+    const t = (text == null ? chatInput : text).trim();
+    if (!t || draft.streaming) return;
+    onChatSend(t);
+    setChatInput("");
+  };
+
+  return (
+    <div className="draft">
+      <div>
+        <div className="draft-subject">Re: {email.subject}</div>
+        <div className="draft-to">To: {email.email}</div>
+      </div>
+
+      <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+        <span style={{fontFamily:"var(--font-mono)",fontSize:10,letterSpacing:"0.08em",color:"var(--fg-dim)",textTransform:"uppercase"}}>Tone</span>
+        <div className="draft-tones">
+          {["Direct", "Warm", "Formal"].map(t => (
+            <button
+              key={t}
+              className={`draft-tone ${draft.tone === t ? "active" : ""}`}
+              onClick={() => onTone(t)}
+            >{t}</button>
+          ))}
+        </div>
+      </div>
+
+      <textarea
+        className={`draft-area ${isStreaming ? "draft-streaming" : ""}`}
+        value={draft.text}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={isStreaming ? "Claude is composing…" : "Your draft will appear here"}
+        readOnly={isStreaming}
+      />
+
+      <div className="draft-foot">
+        <span className="spacer" />
+        <button className="thread-btn primary" disabled={!draft.text || isStreaming} onClick={onSend}>Send →</button>
+      </div>
+
+      {/* AI chat refine */}
+      <div className="draft-chat">
+        <div className="draft-chat-head">
+          <span className="draft-chat-label">
+            <span className="draft-chat-spark">✦</span> Refine with Claude
+          </span>
+          {chat && chat.history && chat.history.length > 0 && (
+            <span style={{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--fg-dim)"}}>
+              {chat.history.length} turn{chat.history.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+
+        {chat && chat.history && chat.history.length > 0 && (
+          <div className="draft-chat-history">
+            {chat.history.map((m, i) => (
+              <div key={i} className={`chat-msg chat-msg-${m.role}`}>
+                <div className="chat-msg-avatar">{m.role === "user" ? "U" : "✦"}</div>
+                <div className="chat-msg-bubble">{m.text}</div>
+              </div>
+            ))}
+            {chat.thinking && (
+              <div className="chat-msg chat-msg-claude">
+                <div className="chat-msg-avatar">✦</div>
+                <div className="chat-msg-bubble chat-thinking">
+                  <span /><span /><span />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="draft-chat-suggestions">
+          {["Make it shorter", "More casual", "More formal", "Add a question", "Be more direct"].map(s => (
+            <button key={s} className="quick-reply" onClick={() => sendInstruction(s)} disabled={draft.streaming}>{s}</button>
+          ))}
+        </div>
+
+        <div className="draft-chat-input">
+          <input
+            placeholder="Ask Claude to change something…"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendInstruction();
+              }
+            }}
+            disabled={draft.streaming}
+          />
+          <button
+            className="chat-send-btn"
+            onClick={() => sendInstruction()}
+            disabled={!chatInput.trim() || draft.streaming}
+            title="Send (Enter)"
+          >↑</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TasksPane = ({ tasks, toggleTask }) => {
+  const active = tasks.filter(t => !t.done);
+  const done = tasks.filter(t => t.done);
+  return (
+    <div>
+      <div className="tracker-section">
+        <div className="tracker-head">
+          <div className="tracker-title">Active · {active.length}</div>
+          <span style={{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--fg-dim)"}}>Auto-extracted by Claude</span>
+        </div>
+        <div className="tasks-list" style={{padding:0}}>
+          {active.map(t => (
+            <div key={t.id} className={`task ${t.done ? "done" : ""}`}>
+              <button className={`task-check ${t.done ? "done" : ""}`} onClick={() => toggleTask(t.id)}>
+                {t.done && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </button>
+              <div className="task-body">
+                <div className="task-text">{t.text}</div>
+                <div className="task-meta">
+                  <span className={`task-pri ${t.priority}`}>{t.priority}</span>
+                  <span className="task-due">⏱ {t.due}</span>
+                  <span className="task-source">from {t.source}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {done.length > 0 && (
+        <div className="tracker-section">
+          <div className="tracker-head">
+            <div className="tracker-title">Done · {done.length}</div>
+            <button className="tracker-add">Clear</button>
+          </div>
+          <div className="tasks-list" style={{padding:0}}>
+            {done.map(t => (
+              <div key={t.id} className={`task done`}>
+                <button className={`task-check done`} onClick={() => toggleTask(t.id)}>
+                  <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+                <div className="task-body">
+                  <div className="task-text">{t.text}</div>
+                  <div className="task-meta">
+                    <span className="task-source">from {t.source}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
+  const [adding, setAdding] = React.useState(false);
+  const [val, setVal] = React.useState("");
+  const submit = () => {
+    const v = val.trim();
+    if (!v) return;
+    onAddVip(v);
+    setVal("");
+    setAdding(false);
+  };
+  return (
+    <div>
+      <div className="tracker-section">
+        <div className="tracker-head">
+          <div className="tracker-title">VIP senders · {vips.length}</div>
+          {!adding && <button className="tracker-add" onClick={() => setAdding(true)}>+ Add</button>}
+        </div>
+        {adding && (
+          <div style={{display:"flex",gap:6,marginBottom:10}}>
+            <input
+              autoFocus
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") submit(); if (e.key === "Escape") { setAdding(false); setVal(""); } }}
+              placeholder="email@domain.com  or  @domain.com"
+              style={{flex:1,background:"var(--bg-elev)",border:"1px solid var(--border)",borderRadius:999,padding:"8px 14px",fontSize:12,color:"var(--fg)",outline:"none"}}
+            />
+            <button className="tracker-add" onClick={submit} style={{background:"var(--accent)",color:"#04140d",fontWeight:800,borderColor:"transparent"}}>Save</button>
+            <button className="tracker-add" onClick={() => { setAdding(false); setVal(""); }}>×</button>
+          </div>
+        )}
+        {vips.map(v => (
+          <div key={v.email} className="vip-row">
+            <div className="vip-avatar">{initialsOf(v.name)}</div>
+            <div>
+              <div className="vip-name">{v.name}</div>
+              <div className="vip-meta">{v.role} · {v.email}</div>
+            </div>
+            <div className="vip-actions" style={{display:"flex",gap:6,alignItems:"center"}}>
+              <span className="followup-due">{v.last}</span>
+              <button
+                className="tracker-add"
+                title="Remove VIP"
+                style={{padding:"3px 8px",fontSize:11}}
+                onClick={() => onRemoveVip(v.email)}
+              >×</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="tracker-section">
+        <div className="tracker-head">
+          <div className="tracker-title">Pending follow-ups · {followups.length}</div>
+          <button className="tracker-add">+ Track</button>
+        </div>
+        {followups.map(f => (
+          <div key={f.id} className="followup-row">
+            <div className="vip-avatar" style={{background:"var(--bg-elev-2)"}}>↗</div>
+            <div>
+              <div className="followup-to">{f.to}</div>
+              <div className="followup-meta">{f.subject} · sent {f.sent}</div>
+            </div>
+            <div className="followup-actions">
+              <span className={`followup-due ${f.overdue ? "overdue" : ""}`}>{f.due}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="tracker-section">
+        <div className="tracker-head">
+          <div className="tracker-title">How it works</div>
+        </div>
+        <div style={{fontSize:12,color:"var(--fg-mute)",lineHeight:1.55}}>
+          Sending a reply automatically tracks it. If they don't respond within your follow-up window, the thread reappears in your Attention queue with an "Overdue" chip.
+        </div>
+      </div>
+    </div>
+  );
+};
+
+window.ContextPane = ContextPane;
+</script>
+<script type="text/babel" data-presets="react">/* Command palette (⌘K) + Focus mode */
+
+const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetView, onToggleFocus }) => {
+  const [q, setQ] = React.useState("");
+  const [cursor, setCursor] = React.useState(0);
+  const inputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (open) {
+      setQ("");
+      setCursor(0);
+      setTimeout(() => inputRef.current && inputRef.current.focus(), 30);
+    }
+  }, [open]);
+
+  const commands = [
+    { id:"focus", group:"Actions", icon:"⚡", label:"Enter focus mode", meta:"Cycle through attention queue", run: () => onToggleFocus() },
+    { id:"v_inbox", group:"Navigation", icon:"📥", label:"Go to inbox", meta:"G then I", run: () => onSetView("inbox") },
+    { id:"v_attn", group:"Navigation", icon:"⚡", label:"Go to attention queue", meta:"G then A", run: () => onSetView("attention") },
+    { id:"v_tasks", group:"Navigation", icon:"✓", label:"Go to tasks", meta:"G then T", run: () => onSetView("tasks") },
+    { id:"v_vips", group:"Navigation", icon:"★", label:"Go to VIPs & follow-ups", meta:"", run: () => onSetView("vips") },
+  ];
+
+  const emailItems = emails.slice(0, 8).map(e => ({
+    id: "e_" + e.id,
+    group: "Jump to email",
+    icon: "✉",
+    label: e.subject,
+    meta: e.sender + " · " + e.time,
+    run: () => onSelectEmail(e.id),
+  }));
+
+  const all = [...commands, ...emailItems];
+  const filtered = q.trim()
+    ? all.filter(c => (c.label + " " + c.meta).toLowerCase().includes(q.toLowerCase()))
+    : all;
+
+  const groups = filtered.reduce((acc, c) => {
+    (acc[c.group] = acc[c.group] || []).push(c);
+    return acc;
+  }, {});
+
+  const flat = filtered;
+  const handleKey = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setCursor(c => Math.min(flat.length - 1, c + 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setCursor(c => Math.max(0, c - 1)); }
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      const item = flat[cursor];
+      if (item) { item.run(); onClose(); }
+    } else if (e.key === "Escape") {
+      onClose();
+    }
+  };
+
+  if (!open) return null;
+
+  let idx = -1;
+  return (
+    <div className="cmdk-overlay" onClick={onClose}>
+      <div className="cmdk" onClick={(e) => e.stopPropagation()}>
+        <input
+          ref={inputRef}
+          className="cmdk-input"
+          placeholder="Search commands, emails, people…"
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setCursor(0); }}
+          onKeyDown={handleKey}
+        />
+        <div className="cmdk-results">
+          {Object.keys(groups).map(g => (
+            <div key={g}>
+              <div className="cmdk-group-label">{g}</div>
+              {groups[g].map(c => {
+                idx++;
+                const active = idx === cursor;
+                return (
+                  <div
+                    key={c.id}
+                    className={`cmdk-item ${active ? "active" : ""}`}
+                    onClick={() => { c.run(); onClose(); }}
+                    onMouseEnter={() => setCursor(flat.indexOf(c))}
+                  >
+                    <span className="cmdk-item-icon">{c.icon}</span>
+                    <span className="cmdk-item-label">{c.label}</span>
+                    <span className="cmdk-item-meta">{c.meta}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+          {flat.length === 0 && (
+            <div style={{padding:"24px 14px",textAlign:"center",color:"var(--fg-dim)",fontSize:13}}>
+              No matches for "{q}"
+            </div>
+          )}
+        </div>
+        <div className="cmdk-foot">
+          <span><span className="cmdk-kbd">↑↓</span> navigate</span>
+          <span><span className="cmdk-kbd">↵</span> select</span>
+          <span><span className="cmdk-kbd">esc</span> close</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const FocusMode = ({ emails, onExit, onAction, onOpenDraft }) => {
+  const [idx, setIdx] = React.useState(0);
+  const items = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation" || e.category === "action_required");
+
+  React.useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "ArrowRight" || e.key === "j") { setIdx(i => Math.min(items.length - 1, i + 1)); }
+      else if (e.key === "ArrowLeft" || e.key === "k") { setIdx(i => Math.max(0, i - 1)); }
+      else if (e.key === "Escape") onExit();
+      else if (e.key === "r") { onAction(items[idx].id, "resolve"); setIdx(i => Math.min(items.length - 2, i)); }
+      else if (e.key === "t") { onAction(items[idx].id, "trash"); setIdx(i => Math.min(items.length - 2, i)); }
+      else if (e.key === "e") { onOpenDraft(items[idx]); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [idx, items, onAction, onExit, onOpenDraft]);
+
+  if (!items.length) return (
+    <div className="focus-stage">
+      <div className="focus-head">
+        <div style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-dim)",letterSpacing:"0.08em",textTransform:"uppercase"}}>Focus mode</div>
+        <div className="focus-progress" />
+        <button className="thread-btn" onClick={onExit}>Exit (esc)</button>
+      </div>
+      <div className="focus-card-wrap">
+        <div className="focus-card" style={{textAlign:"center"}}>
+          <div style={{fontSize:32,marginBottom:12}}>🌿</div>
+          <div className="focus-subject">Inbox zero in attention</div>
+          <div className="focus-body" style={{textAlign:"center"}}>Nothing critical right now. Take a break or check the full inbox.</div>
+          <button className="thread-btn primary" onClick={onExit} style={{margin:"0 auto"}}>Back to inbox</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const email = items[idx];
+  const thread = email.thread || [{ from: email.sender, text: email.preview, time: email.time }];
+
+  return (
+    <div className="focus-stage">
+      <div className="focus-head">
+        <div style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-dim)",letterSpacing:"0.08em",textTransform:"uppercase"}}>
+          Focus · {idx + 1} of {items.length}
+        </div>
+        <div className="focus-progress">
+          {items.map((_, i) => (
+            <div key={i} className={`focus-pip ${i < idx ? "done" : ""} ${i === idx ? "current" : ""}`} />
+          ))}
+        </div>
+        <button className="thread-btn" onClick={onExit}>Exit <span className="focus-kbd-hint">esc</span></button>
+      </div>
+
+      <div className="focus-card-wrap">
+        <div className="focus-card">
+          <div className="focus-from">
+            <div className="focus-avatar">{email.avatar}</div>
+            <div>
+              <div className="focus-from-name">{email.sender} {email.vip && <span style={{color:"oklch(0.85 0.15 80)"}}>★</span>}</div>
+              <div className="focus-from-meta">{email.email} · {email.time}</div>
+            </div>
+            <div style={{marginLeft:"auto",display:"flex",gap:6}}>
+              <span className="thread-meta-pill" style={{"--c": CAT_VAR[email.category]}}>{CAT_LABEL[email.category]}</span>
+              {(email.reasons||[]).slice(0,2).map(r => (
+                <span key={r} className="thread-meta-pill" style={{"--c": "var(--fg-mute)"}}>{r}</span>
+              ))}
+            </div>
+          </div>
+          <div className="focus-subject">{email.subject}</div>
+          <div className="focus-body">{thread[0].text}</div>
+        </div>
+      </div>
+
+      <div className="focus-foot">
+        <button className="focus-foot-btn" onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}>← Prev <span className="focus-kbd-hint">k</span></button>
+        <button className="focus-foot-btn" onClick={() => { onAction(email.id, "trash"); }}>🗑 Trash <span className="focus-kbd-hint">t</span></button>
+        <button className="focus-foot-btn" onClick={() => { onOpenDraft(email); }}>✏️ Reply <span className="focus-kbd-hint">e</span></button>
+        <button className="focus-foot-btn primary" onClick={() => { onAction(email.id, "resolve"); }}>✓ Resolve <span className="focus-kbd-hint">r</span></button>
+        <button className="focus-foot-btn" onClick={() => setIdx(i => Math.min(items.length - 1, i + 1))} disabled={idx === items.length - 1}>Next → <span className="focus-kbd-hint">j</span></button>
+      </div>
+    </div>
+  );
+};
+
+window.CommandPalette = CommandPalette;
+window.FocusMode = FocusMode;
+</script>
+<script type="text/babel" data-presets="react">/* Main app — wires everything together */
+
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+// ---- Backend adapter ----
+const IS_APPS_SCRIPT = typeof google !== "undefined" && google.script && google.script.run;
+const gsRun = (fn, ...args) => new Promise((resolve, reject) => {
+  if (!IS_APPS_SCRIPT) { reject(new Error("Not in Apps Script")); return; }
+  google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args);
+});
+
+// initialsOf defined in context.jsx — reuse
+
+const timeAgo = (iso) => {
+  if (!iso) return "—";
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "now";
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  const d = Math.floor(h / 24);
+  return d + "d ago";
+};
+
+const mapServerEmail = (e) => ({
+  id: e.id,
+  sender: e.sender_name || e.sender_email || "(unknown)",
+  email: e.sender_email || "",
+  avatar: initialsOf(e.sender_name || e.sender_email),
+  subject: e.subject || "(no subject)",
+  preview: e.summary || "",
+  time: timeAgo(e.date),
+  timestamp: e.date ? new Date(e.date).getTime() : Date.now(),
+  category: e.category || "low_priority",
+  priority: e.priority || 1,
+  unread: true,
+  reasons: e.attentionReasons || [],
+  vip: !!(e.attentionSignals && e.attentionSignals.vip),
+  thread: null,
+  photo: e.photo,
+  isFollowup: !!e.isFollowup,
+  hasFollowup: !!e.hasFollowup,
+});
+
+const mapTask = (t) => ({
+  id: t.id,
+  text: t.description || "(no description)",
+  priority: t.priority || "medium",
+  due: t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "—",
+  source: t.sender_name || t.subject || "—",
+  done: !!t.done,
+});
+
+const mapVip = (s) => ({
+  name: s,
+  email: s,
+  role: String(s).startsWith("@") ? "Domain rule" : "VIP sender",
+  last: "—",
+});
+
+// ─── Logo configuration ────────────────────────────────────────────────────
+// To use a custom logo image (e.g. your company logo): paste its URL below.
+// Leave as "" to use the default "T" letter mark.
+// Example: const LOGO_URL = "https://example.com/your-logo.png";
+const LOGO_URL = "";
+// ───────────────────────────────────────────────────────────────────────────
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "accentHue": 162,
+  "density": "comfortable",
+  "attentionStyle": "banner",
+  "motion": "subtle"
+}/*EDITMODE-END*/;
+
+const TONE_DRAFTS = {
+  Direct: (e) => `Hi ${e.sender.split(" ")[0]},\n\nGot it — here's where I am:\n\n• ${e.subject.replace(/^(re:|fwd:)\s*/i, "")} — handled.\n• Will keep you posted as it moves.\n\nLet me know if anything else.\n\nJamie`,
+  Warm: (e) => `Hi ${e.sender.split(" ")[0]},\n\nThanks for the note — appreciate you flagging this.\n\nI'll take a look and get back to you with specifics by EOD. If there's anything urgent in the meantime, drop me a line.\n\nBest,\nJamie`,
+  Formal: (e) => `Dear ${e.sender.split(" ")[0]},\n\nThank you for your email regarding ${e.subject.toLowerCase()}.\n\nI have reviewed the matter and will provide a substantive response within one business day. Please reach out should you require anything in the interim.\n\nKind regards,\nJamie Tran`,
+};
+
+const App = () => {
+  const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // Apply tweaks to <html>
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", tw.theme);
+    document.documentElement.setAttribute("data-density", tw.density);
+    document.documentElement.setAttribute("data-motion", tw.motion === "off" ? "off" : "on");
+    document.documentElement.style.setProperty("--accent-h", tw.accentHue);
+  }, [tw.theme, tw.density, tw.motion, tw.accentHue]);
+
+  // Core state
+  const [emails, setEmails] = useState(() => SCENARIOS.busy.emails);
+  const sub = SCENARIOS.busy.sub;
+  const [view, setView] = useState("inbox");
+  const [activeTab, setActiveTab] = useState("all");
+  const [activeCat, setActiveCat] = useState(null);
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+  const [checked, setChecked] = useState(new Set());
+  const [lastChecked, setLastChecked] = useState(null);
+  const [dismissingIds, setDismissingIds] = useState(new Set());
+  const [contextTab, setContextTab] = useState("thread");
+  const [tasks, setTasks] = useState(() => IS_APPS_SCRIPT ? [] : [...TASKS]);
+  const [vips, setVips] = useState(() => IS_APPS_SCRIPT ? [] : [...VIPS]);
+  const [followups] = useState(() => [...FOLLOWUPS]);
+  const [loadingInbox, setLoadingInbox] = useState(IS_APPS_SCRIPT);
+  const [user, setUser] = useState(() => IS_APPS_SCRIPT ? { name: "Loading…", email: "" } : { name: "Jamie Tran", email: "jamie@acme.com" });
+  const [toasts, setToasts] = useState([]);
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const [draft, setDraft] = useState({ text: "", tone: "Warm", streaming: false, chat: { history: [], thinking: false } });
+
+  // Scenario switch resets list — removed (single scenario)
+
+  // ---- Live Gmail fetch (Apps Script only) ----
+  const pushToast = useCallback((msg, undoFn) => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts(t => [...t, { id, msg, undoFn }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4500);
+  }, []);
+
+  const refreshInbox = useCallback(() => {
+    if (!IS_APPS_SCRIPT) return;
+    setLoadingInbox(true);
+    gsRun("fetchInboxSnapshot")
+      .then(snapshot => {
+        const initial = (snapshot.emails || []).map(mapServerEmail);
+        setEmails(initial);
+        return gsRun("classifyInboxEmails", snapshot.emails);
+      })
+      .then(classified => {
+        if (classified && classified.emails) {
+          setEmails(classified.emails.map(mapServerEmail));
+        }
+      })
+      .catch(e => pushToast("Inbox load failed: " + (e.message || e)))
+      .finally(() => setLoadingInbox(false));
+  }, [pushToast]);
+
+  useEffect(() => {
+    if (!IS_APPS_SCRIPT) return;
+    refreshInbox();
+    gsRun("getTasks").then(t => Array.isArray(t) && setTasks(t.map(mapTask))).catch(() => {});
+    gsRun("getVipSenders").then(v => Array.isArray(v) && setVips(v.map(mapVip))).catch(() => {});
+    gsRun("getCurrentUser").then(u => u && u.email && setUser({ name: u.name || u.email.split("@")[0], email: u.email })).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Lazy-load thread when an email is selected
+  useEffect(() => {
+    if (!IS_APPS_SCRIPT || !selectedId) return;
+    const email = emails.find(e => e.id === selectedId);
+    if (!email || email.thread) return;
+    gsRun("getEmailBody", selectedId).then(messages => {
+      const thread = (messages || []).map(m => ({
+        from: m.from || (m.isMe ? "You" : "(unknown)"),
+        text: m.body || "",
+        time: m.date ? new Date(m.date).toLocaleString() : "",
+        isMe: m.isMe,
+      }));
+      setEmails(prev => prev.map(e => e.id === selectedId ? { ...e, thread } : e));
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  // Derived: filtered emails
+  const filtered = useMemo(() => {
+    let list = emails.filter(e => !dismissingIds.has(e.id));
+
+    if (view === "attention") {
+      list = list.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
+    }
+    if (activeTab === "attention") {
+      list = list.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
+    } else if (activeTab !== "all") {
+      list = list.filter(e => e.category === activeTab);
+    }
+    if (activeCat) list = list.filter(e => e.category === activeCat);
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(e =>
+        [e.sender, e.email, e.subject, e.preview].some(v => String(v||"").toLowerCase().includes(q))
+      );
+    }
+
+    return list.sort((a, b) => {
+      const ao = CAT_ORDER.indexOf(a.category);
+      const bo = CAT_ORDER.indexOf(b.category);
+      if (ao !== bo) return ao - bo;
+      return (b.priority || 0) - (a.priority || 0);
+    });
+  }, [emails, view, activeTab, activeCat, search, dismissingIds]);
+
+  const selectedEmail = useMemo(() => emails.find(e => e.id === selectedId), [emails, selectedId]);
+
+  // Counts for rail
+  const totals = useMemo(() => ({
+    inbox: emails.length,
+    attention: emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation").length,
+    tasks: tasks.filter(t => !t.done).length,
+    vipFollow: vips.length + followups.length,
+    resolved: 0,
+    trashed: 0,
+  }), [emails, tasks, vips, followups]);
+
+  // Toast helpers — pushToast defined above
+
+  // Email actions (with animation + undo)
+  const doAction = useCallback((ids, action) => {
+    const idSet = new Set(Array.isArray(ids) ? ids : [ids]);
+    const affected = emails.filter(e => idSet.has(e.id));
+    setDismissingIds(prev => new Set([...prev, ...idSet]));
+
+    setTimeout(() => {
+      setEmails(prev => prev.filter(e => !idSet.has(e.id)));
+      setDismissingIds(prev => {
+        const next = new Set(prev);
+        idSet.forEach(id => next.delete(id));
+        return next;
+      });
+      if (idSet.has(selectedId)) setSelectedId(null);
+      setChecked(prev => {
+        const next = new Set(prev);
+        idSet.forEach(id => next.delete(id));
+        return next;
+      });
+    }, 240);
+
+    const verb = action === "resolve" ? "Resolved" : action === "trash" ? "Trashed" : "Snoozed";
+    const n = affected.length;
+    pushToast(
+      `${verb} ${n} email${n === 1 ? "" : "s"}`,
+      () => { setEmails(prev => [...affected, ...prev]); }
+    );
+
+    // Server-side
+    if (IS_APPS_SCRIPT) {
+      const fn = action === "resolve" ? "resolveEmail" : action === "trash" ? "trashEmail" : null;
+      if (fn) idSet.forEach(id => gsRun(fn, id).catch(e => pushToast("Server: " + (e.message||e))));
+    }
+  }, [emails, selectedId, pushToast]);
+
+  // Batch select
+  const onCheck = useCallback((id, shouldCheck, shift) => {
+    setChecked(prev => {
+      const next = new Set(prev);
+      if (shift && lastChecked) {
+        // Range select
+        const ids = filtered.map(e => e.id);
+        const a = ids.indexOf(lastChecked);
+        const b = ids.indexOf(id);
+        if (a >= 0 && b >= 0) {
+          const [lo, hi] = a < b ? [a, b] : [b, a];
+          for (let i = lo; i <= hi; i++) {
+            if (shouldCheck) next.add(ids[i]); else next.delete(ids[i]);
+          }
+        }
+      } else {
+        if (shouldCheck) next.add(id); else next.delete(id);
+      }
+      return next;
+    });
+    setLastChecked(id);
+  }, [lastChecked, filtered]);
+
+  // Draft handling — uses real Claude via fetchAndDraftReply on Apps Script,
+  // local mock template otherwise. Visual char-by-char streaming for feel.
+  const streamDraft = useCallback(async (email, tone) => {
+    setDraft({ text: "", tone: tone || "Warm", streaming: true, chat: { history: [], thinking: false } });
+    setContextTab("draft");
+
+    let full;
+    try {
+      if (IS_APPS_SCRIPT) {
+        const result = await gsRun("fetchAndDraftReply", email.id);
+        full = (result && result.draft) || "";
+      } else {
+        full = TONE_DRAFTS[tone || "Warm"](email);
+      }
+    } catch (e) {
+      pushToast("Draft failed: " + (e.message || e));
+      setDraft({ text: "", tone: tone || "Warm", streaming: false, chat: { history: [], thinking: false } });
+      return;
+    }
+
+    let i = 0;
+    const chunk = Math.max(2, Math.floor(full.length / 80));
+    const tick = () => {
+      i += chunk + Math.floor(Math.random() * 3);
+      if (i >= full.length) {
+        setDraft(d => ({ ...d, text: full, streaming: false }));
+        return;
+      }
+      setDraft(d => ({ ...d, text: full.slice(0, i) }));
+      setTimeout(tick, 18 + Math.random() * 28);
+    };
+    setTimeout(tick, 100);
+  }, [pushToast]);
+
+  // Refine current draft via chat
+  const refineDraft = useCallback(async (instruction) => {
+    if (!selectedEmail) return;
+    setDraft(d => ({
+      ...d,
+      streaming: true,
+      chat: {
+        history: [...(d.chat?.history || []), { role: "user", text: instruction }],
+        thinking: true,
+      },
+    }));
+
+    let nextDraft;
+    try {
+      if (IS_APPS_SCRIPT) {
+        // Expects a server function `refineDraft(messageId, currentDraft, instruction, tone)`
+        // returning { draft: "..." }. See chat block below for the Code.gs snippet.
+        const result = await gsRun("refineDraft", selectedEmail.id, draft.text, instruction, draft.tone);
+        nextDraft = (result && result.draft) || "";
+      } else {
+        // Local mock: tweak the existing draft heuristically so the UX is testable.
+        const base = draft.text || TONE_DRAFTS[draft.tone || "Warm"](selectedEmail);
+        const i = instruction.toLowerCase();
+        if (i.includes("short")) nextDraft = base.split("\n\n").slice(0, 2).join("\n\n");
+        else if (i.includes("casual")) nextDraft = base.replace(/Dear /g, "Hi ").replace(/Kind regards/g, "Cheers");
+        else if (i.includes("formal")) nextDraft = "Dear " + selectedEmail.sender.split(" ")[0] + ",\n\n" + base + "\n\nKind regards,\nJamie";
+        else if (i.includes("question")) nextDraft = base + "\n\nWhat would you like to do next?";
+        else if (i.includes("direct")) nextDraft = base.split("\n\n").map(p => p.replace(/I have /g, "I've ")).join("\n\n");
+        else nextDraft = base + "\n\n[Refined per: " + instruction + "]";
+      }
+    } catch (e) {
+      pushToast("Refine failed: " + (e.message || e));
+      setDraft(d => ({ ...d, streaming: false, chat: { ...d.chat, thinking: false } }));
+      return;
+    }
+
+    // Stream the refined response
+    const full = nextDraft;
+    setDraft(d => ({
+      ...d,
+      text: "",
+      streaming: true,
+      chat: {
+        history: [...d.chat.history, { role: "claude", text: "Done — updated the draft." }],
+        thinking: false,
+      },
+    }));
+
+    let i = 0;
+    const chunk = Math.max(2, Math.floor(full.length / 80));
+    const tick = () => {
+      i += chunk + Math.floor(Math.random() * 3);
+      if (i >= full.length) {
+        setDraft(d => ({ ...d, text: full, streaming: false }));
+        return;
+      }
+      setDraft(d => ({ ...d, text: full.slice(0, i) }));
+      setTimeout(tick, 18 + Math.random() * 28);
+    };
+    setTimeout(tick, 80);
+  }, [selectedEmail, draft.text, draft.tone, pushToast]);
+
+  const openDraft = useCallback((email) => {
+    setSelectedId(email.id);
+    streamDraft(email, draft.tone);
+  }, [streamDraft, draft.tone]);
+
+  const sendDraft = useCallback(() => {
+    if (!selectedEmail) return;
+    if (IS_APPS_SCRIPT) {
+      gsRun("sendDraftReply", selectedEmail.id, draft.text)
+        .then(() => {
+          pushToast("Reply sent · email resolved");
+          doAction(selectedEmail.id, "resolve");
+          setDraft({ text: "", tone: "Warm", streaming: false });
+          setContextTab("thread");
+        })
+        .catch(e => pushToast("Send failed: " + (e.message || e)));
+      return;
+    }
+    pushToast("Reply sent · email resolved");
+    doAction(selectedEmail.id, "resolve");
+    setDraft({ text: "", tone: "Warm", streaming: false });
+    setContextTab("thread");
+  }, [selectedEmail, draft.text, doAction, pushToast]);
+
+  // Tasks
+  const toggleTask = useCallback((id) => {
+    let nextDone = false;
+    setTasks(prev => prev.map(t => {
+      if (t.id !== id) return t;
+      nextDone = !t.done;
+      return { ...t, done: nextDone };
+    }));
+    if (IS_APPS_SCRIPT) gsRun("markTaskDone", id, nextDone).catch(() => {});
+  }, []);
+
+  // VIPs
+  const addVip = useCallback((val) => {
+    const v = String(val || "").toLowerCase().trim();
+    if (!v) return;
+    setVips(prev => prev.some(x => x.email === v) ? prev : [...prev, mapVip(v)]);
+    if (IS_APPS_SCRIPT) {
+      gsRun("addVipSender", v)
+        .then(updated => Array.isArray(updated) && setVips(updated.map(mapVip)))
+        .catch(e => pushToast("Add VIP failed: " + (e.message || e)));
+    }
+  }, [pushToast]);
+
+  const removeVip = useCallback((val) => {
+    setVips(prev => prev.filter(x => x.email !== val));
+    if (IS_APPS_SCRIPT) {
+      gsRun("removeVipSender", val)
+        .then(updated => Array.isArray(updated) && setVips(updated.map(mapVip)))
+        .catch(e => pushToast("Remove VIP failed: " + (e.message || e)));
+    }
+  }, [pushToast]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      const inField = tag === "input" || tag === "textarea";
+
+      // Cmd/Ctrl-K — palette (works even in fields)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCmdOpen(true);
+        return;
+      }
+      if (inField) return;
+
+      if (e.key === "?") { setCmdOpen(true); return; }
+      if (e.altKey && e.key.toLowerCase() === "f") { e.preventDefault(); setFocusOpen(true); return; }
+
+      // List navigation
+      if (focusOpen) return;
+      if (e.key === "j" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const i = filtered.findIndex(x => x.id === selectedId);
+        const next = filtered[Math.min(filtered.length - 1, i + 1)] || filtered[0];
+        if (next) setSelectedId(next.id);
+      }
+      if (e.key === "k" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const i = filtered.findIndex(x => x.id === selectedId);
+        const next = filtered[Math.max(0, i - 1)] || filtered[0];
+        if (next) setSelectedId(next.id);
+      }
+      if (selectedId) {
+        if (e.key === "r") { doAction(selectedId, "resolve"); }
+        if (e.key === "t") { doAction(selectedId, "trash"); }
+        if (e.key === "s") { doAction(selectedId, "snooze"); }
+        if (e.key === "e") {
+          const em = emails.find(x => x.id === selectedId);
+          if (em) openDraft(em);
+        }
+      }
+      // Select all when checks present
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        setChecked(new Set(filtered.map(x => x.id)));
+      }
+      if (e.key === "Escape") {
+        setChecked(new Set());
+        if (selectedId) setSelectedId(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [filtered, selectedId, doAction, openDraft, emails, focusOpen]);
+
+  // Auto-select first item on mount
+  useEffect(() => {
+    if (filtered.length && !selectedId) {
+      setSelectedId(filtered[0].id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ---- Sub-views ----
+  if (focusOpen) {
+    return (
+      <div className="shell focus">
+        <FocusMode
+          emails={emails}
+          onExit={() => setFocusOpen(false)}
+          onAction={doAction}
+          onOpenDraft={openDraft}
+        />
+        <CommandPalette
+          open={cmdOpen}
+          onClose={() => setCmdOpen(false)}
+          emails={emails}
+          onSelectEmail={(id) => { setSelectedId(id); setFocusOpen(false); }}
+          onAction={doAction}
+          onSetView={(v) => { setView(v); setFocusOpen(false); }}
+          onToggleFocus={() => setFocusOpen(true)}
+        />
+        <ToastWrap toasts={toasts} />
+      </div>
+    );
+  }
+
+  // ---- Build list groups (when activeTab=all) ----
+  const sectioned = activeTab === "all" && !search;
+  const sectionedGroups = sectioned
+    ? CAT_ORDER.map(cat => ({
+        cat,
+        items: filtered.filter(e => e.category === cat),
+      })).filter(g => g.items.length > 0)
+    : [{ cat: null, items: filtered }];
+
+  return (
+    <div className={`shell ${(view === "tasks" || view === "vips" || view === "resolved" || view === "trashed") ? "no-right" : ""}`}>
+      <Rail
+        view={view}
+        setView={(v) => {
+          setView(v);
+          if (v === "tasks") setContextTab("tasks");
+          else if (v === "vips") setContextTab("tracker");
+          else setContextTab("thread");
+          if (v === "attention") setActiveTab("attention");
+          else if (v === "inbox") setActiveTab("all");
+        }}
+        totals={totals}
+        user={user}
+        logoUrl={LOGO_URL}
+      />
+
+      <main className="main">
+        <header className="topbar">
+          <div>
+            <div className="topbar-title">
+              {view === "inbox" && "Inbox"}
+              {view === "attention" && "Attention queue"}
+              {view === "tasks" && "Tasks"}
+              {view === "vips" && "VIPs & follow-ups"}
+              {view === "resolved" && "Resolved"}
+              {view === "trashed" && "Trashed"}
+            </div>
+            <div className="topbar-sub">
+              {loadingInbox
+                ? "Fetching inbox…"
+                : `${emails.length} email${emails.length === 1 ? "" : "s"} · ${totals.attention} need attention`}
+            </div>
+          </div>
+
+          <div className="search" style={{marginLeft:"auto"}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="6" cy="6" r="4.5" /><path d="M9.5 9.5L12 12" strokeLinecap="round" />
+            </svg>
+            <input
+              placeholder="Search inbox…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                title="Clear search"
+                style={{background:"none",border:"none",color:"var(--fg-dim)",cursor:"pointer",fontSize:18,lineHeight:1,padding:"0 4px"}}
+              >×</button>
+            )}
+            <span className="search-kbd">⌘K</span>
+          </div>
+
+          <button className="icon-btn" title="Refresh inbox" onClick={refreshInbox} disabled={loadingInbox} style={loadingInbox ? {opacity:0.5} : {}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" style={loadingInbox?{animation:"spin 1s linear infinite"}:{}}>
+              <path d="M12 4a5 5 0 11-1.5-3.5M12 1v3h-3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <button className="icon-btn" title="Focus mode (alt-F)" onClick={() => setFocusOpen(true)}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="7" cy="7" r="5.5"/><circle cx="7" cy="7" r="2"/>
+            </svg>
+          </button>
+        </header>
+
+        {(view === "inbox" || view === "attention") && (
+          <>
+            <Stats emails={emails} activeCat={activeCat} setActiveCat={setActiveCat} />
+            <AttentionBanner
+              emails={emails}
+              style={tw.attentionStyle}
+              onClick={() => setFocusOpen(true)}
+            />
+            <EmailListTabs emails={emails} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {checked.size > 0 && (
+              <div className="batch-bar">
+                <span className="batch-count">{checked.size} selected</span>
+                <button className="batch-btn primary" onClick={() => doAction(Array.from(checked), "resolve")}>✓ Resolve all</button>
+                <button className="batch-btn" onClick={() => doAction(Array.from(checked), "snooze")}>☾ Snooze</button>
+                <button className="batch-btn" onClick={() => doAction(Array.from(checked), "trash")}>🗑 Trash</button>
+                <span className="batch-spacer" />
+                <button className="batch-btn" onClick={() => setChecked(new Set())}>Clear</button>
+              </div>
+            )}
+
+            <div className="list">
+              {filtered.length === 0 && (
+                <div className="list-empty">
+                  <div className="list-empty-icon">📭</div>
+                  <div className="list-empty-title">Nothing here</div>
+                  <div className="list-empty-sub">{search ? `No matches for "${search}"` : "Try a different filter"}</div>
+                  {search && (
+                    <button
+                      className="thread-btn"
+                      onClick={() => setSearch("")}
+                      style={{marginTop:18, display:"inline-flex"}}
+                    >× Clear search</button>
+                  )}
+                </div>
+              )}
+              {sectionedGroups.map((g, gi) => (
+                <React.Fragment key={g.cat || "all"}>
+                  {g.cat && (
+                    <div className="list-section-label">
+                      {CAT_LABEL[g.cat]} · {g.items.length}
+                    </div>
+                  )}
+                  {g.items.map(email => (
+                    <EmailRow
+                      key={email.id}
+                      email={email}
+                      selected={selectedId === email.id}
+                      checked={checked.has(email.id)}
+                      dismissing={dismissingIds.has(email.id)}
+                      batchMode={checked.size > 0}
+                      onSelect={(id) => { setSelectedId(id); setContextTab("thread"); }}
+                      onCheck={onCheck}
+                      onAction={doAction}
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </>
+        )}
+
+        {view === "tasks" && (
+          <div className="list" style={{padding:"18px"}}>
+            <TasksFullView tasks={tasks} toggleTask={toggleTask} />
+          </div>
+        )}
+
+        {view === "vips" && (
+          <div className="list" style={{padding:"18px"}}>
+            <TrackerFullView vips={vips} followups={followups} />
+          </div>
+        )}
+
+        {(view === "resolved" || view === "trashed") && (
+          <div className="list-empty" style={{padding:"80px 20px"}}>
+            <div className="list-empty-icon">{view === "resolved" ? "✓" : "🗑"}</div>
+            <div className="list-empty-title">No {view} items in this session</div>
+            <div className="list-empty-sub">Resolve or trash emails to see them here</div>
+          </div>
+        )}
+      </main>
+
+      {(view === "inbox" || view === "attention") && (
+        <ContextPane
+          contextTab={contextTab}
+          setContextTab={setContextTab}
+          selectedEmail={selectedEmail}
+          onResolve={(id) => doAction(id, "resolve")}
+          onTrash={(id) => doAction(id, "trash")}
+          onSnooze={(id) => doAction(id, "snooze")}
+          tasks={tasks}
+          toggleTask={toggleTask}
+          vips={vips}
+          followups={followups}
+          onAddVip={addVip}
+          onRemoveVip={removeVip}
+          draftState={draft}
+          onOpenDraft={openDraft}
+          onUpdateDraft={(text) => setDraft(d => ({ ...d, text, streaming: false }))}
+          onSendDraft={sendDraft}
+          onChatRefine={refineDraft}
+          onChangeTone={(tone) => {
+            setDraft(d => ({ ...d, tone }));
+            if (selectedEmail) streamDraft(selectedEmail, tone);
+          }}
+        />
+      )}
+
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        emails={emails}
+        onSelectEmail={(id) => { setSelectedId(id); setView("inbox"); setContextTab("thread"); }}
+        onAction={doAction}
+        onSetView={setView}
+        onToggleFocus={() => setFocusOpen(true)}
+      />
+
+      <ToastWrap toasts={toasts} />
+
+      <AppTweaks tw={tw} setTweak={setTweak} />
+    </div>
+  );
+};
+
+const ToastWrap = ({ toasts }) => (
+  <div className="toast-wrap">
+    {toasts.map(t => (
+      <div key={t.id} className="toast">
+        <span>{t.msg}</span>
+        {t.undoFn && <button className="toast-undo" onClick={t.undoFn}>Undo</button>}
+      </div>
+    ))}
+  </div>
+);
+
+const TasksFullView = ({ tasks, toggleTask }) => {
+  const active = tasks.filter(t => !t.done);
+  const done = tasks.filter(t => t.done);
+  return (
+    <div style={{maxWidth: 760, margin: "0 auto"}}>
+      <div style={{fontFamily:"var(--font-mono)",fontSize:10,letterSpacing:"0.08em",color:"var(--fg-dim)",textTransform:"uppercase",marginBottom:12}}>
+        Active · {active.length} · Auto-extracted by Claude from your inbox
+      </div>
+      <div>
+        {active.map(t => (
+          <div key={t.id} className="task" style={{borderBottom:"1px solid var(--line-soft)",padding:"14px 0"}}>
+            <button className={`task-check ${t.done?"done":""}`} onClick={() => toggleTask(t.id)}>
+              {t.done && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </button>
+            <div className="task-body">
+              <div className="task-text" style={{fontSize:14}}>{t.text}</div>
+              <div className="task-meta">
+                <span className={`task-pri ${t.priority}`}>{t.priority}</span>
+                <span className="task-due">⏱ {t.due}</span>
+                <span className="task-source">from {t.source}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {done.length > 0 && (
+        <>
+          <div style={{fontFamily:"var(--font-mono)",fontSize:10,letterSpacing:"0.08em",color:"var(--fg-dim)",textTransform:"uppercase",margin:"24px 0 12px"}}>
+            Done · {done.length}
+          </div>
+          {done.map(t => (
+            <div key={t.id} className="task done" style={{borderBottom:"1px solid var(--line-soft)",padding:"14px 0"}}>
+              <button className="task-check done" onClick={() => toggleTask(t.id)}>
+                <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <div className="task-body">
+                <div className="task-text" style={{fontSize:14}}>{t.text}</div>
+                <div className="task-meta"><span className="task-source">from {t.source}</span></div>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+};
+
+const TrackerFullView = ({ vips, followups }) => (
+  <div style={{maxWidth: 760, margin: "0 auto", display:"grid", gridTemplateColumns:"1fr 1fr", gap:24}}>
+    <div>
+      <div style={{fontFamily:"var(--font-mono)",fontSize:10,letterSpacing:"0.08em",color:"var(--fg-dim)",textTransform:"uppercase",marginBottom:12}}>
+        VIP senders · {vips.length}
+      </div>
+      {vips.map(v => (
+        <div key={v.email} className="vip-row" style={{padding:"12px 0"}}>
+          <div className="vip-avatar">{(v.name||"").split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase()}</div>
+          <div>
+            <div className="vip-name">{v.name}</div>
+            <div className="vip-meta">{v.role} · {v.email}</div>
+          </div>
+          <span className="followup-due">{v.last}</span>
+        </div>
+      ))}
+    </div>
+    <div>
+      <div style={{fontFamily:"var(--font-mono)",fontSize:10,letterSpacing:"0.08em",color:"var(--fg-dim)",textTransform:"uppercase",marginBottom:12}}>
+        Pending follow-ups · {followups.length}
+      </div>
+      {followups.map(f => (
+        <div key={f.id} className="followup-row" style={{padding:"12px 0"}}>
+          <div className="vip-avatar" style={{background:"var(--bg-elev-2)"}}>↗</div>
+          <div>
+            <div className="followup-to">{f.to}</div>
+            <div className="followup-meta">{f.subject} · sent {f.sent}</div>
+          </div>
+          <span className={`followup-due ${f.overdue?"overdue":""}`}>{f.due}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const AppTweaks = ({ tw, setTweak }) => (
+  <TweaksPanel title="Tweaks">
+    <TweakSection title="Theme">
+      <TweakRadio
+        label="Mode"
+        value={tw.theme}
+        onChange={(v) => setTweak("theme", v)}
+        options={[
+          { value: "dark",  label: "Dark"  },
+          { value: "light", label: "Light" },
+          { value: "hc",    label: "HC"    },
+        ]}
+      />
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0"}}>
+        <span style={{fontSize:12,color:"var(--fg-mute)"}}>Accent</span>
+        <AccentHueSwatches value={tw.accentHue} onChange={(v) => setTweak("accentHue", v)} />
+      </div>
+    </TweakSection>
+    <TweakSection title="Layout">
+      <TweakRadio
+        label="Density"
+        value={tw.density}
+        onChange={(v) => setTweak("density", v)}
+        options={[
+          { value: "comfortable", label: "Comfy"   },
+          { value: "compact",     label: "Compact" },
+        ]}
+      />
+      <TweakRadio
+        label="Attention"
+        value={tw.attentionStyle}
+        onChange={(v) => setTweak("attentionStyle", v)}
+        options={[
+          { value: "banner", label: "Banner" },
+          { value: "hero",   label: "Hero"   },
+          { value: "hidden", label: "Hidden" },
+        ]}
+      />
+      <TweakRadio
+        label="Motion"
+        value={tw.motion}
+        onChange={(v) => setTweak("motion", v)}
+        options={[
+          { value: "subtle", label: "Subtle" },
+          { value: "off",    label: "Off"    },
+        ]}
+      />
+    </TweakSection>
+  </TweaksPanel>
+);
+
+const AccentHueSwatches = ({ value, onChange }) => {
+  const hues = [162, 200, 240, 280, 25, 80];
+  return (
+    <div style={{display:"flex",gap:6,padding:"4px 0"}}>
+      {hues.map(h => (
+        <button
+          key={h}
+          onClick={() => onChange(h)}
+          style={{
+            width: 26, height: 26, borderRadius: "50%",
+            background: `oklch(0.74 0.13 ${h})`,
+            border: value === h ? "2px solid var(--fg)" : "1px solid var(--line)",
+            cursor: "pointer",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
