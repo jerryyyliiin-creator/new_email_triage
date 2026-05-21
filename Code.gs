@@ -6,7 +6,7 @@ const API_KEY_PROP = 'ANTHROPIC_API_KEY';
 const MODEL = 'claude-haiku-4-5-20251001';
 const CLASSIFICATION_CACHE_PROP = 'EMAIL_CLASS_CACHE';
 const CLASSIFICATION_CACHE_TTL_MS = 24 * 3600 * 1000;
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxyr9C3hyR8sjF8ZvQ81CyazgP13rL2A-_fNFvnW2OFKoGSegTS2ZXPoFi4oWn3kG9-qQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxDNqLP0-NT77sc2n_l4zTugk3KfouqEcnZxCrSEfX-NLXJmS2HxFq2Cxn0At1rRC7c/exec';
 
 const CAT_META = {
   escalation: { label: 'Escalation', emoji: '🔥', icon: CardService.Icon.STAR },
@@ -421,6 +421,34 @@ function processFollowups() {
   }
 
   return { overdue, activeIds };
+}
+
+function getFollowups() {
+  const data = parseJson_(getUserProps_().getProperty('FOLLOWUP_DATA'), {});
+  const now = new Date();
+  return Object.keys(data).map(function(id) {
+    const f = data[id];
+    const dueDate = new Date(f.followupAt);
+    const addedDate = new Date(f.addedAt);
+    const isOverdue = now > dueDate;
+    const sentDays = Math.floor((now - addedDate) / 86400000);
+    let dueStr;
+    if (isOverdue) {
+      const d = Math.floor((now - dueDate) / 86400000);
+      dueStr = 'Overdue ' + d + ' day' + (d === 1 ? '' : 's');
+    } else {
+      const d = Math.ceil((dueDate - now) / 86400000);
+      dueStr = d === 0 ? 'Due today' : d === 1 ? 'Due tomorrow' : 'Due in ' + d + ' days';
+    }
+    return {
+      id: id,
+      to: f.sender_name || f.sender_email || '(unknown)',
+      subject: f.subject || '(no subject)',
+      sent: sentDays === 0 ? 'today' : sentDays + ' day' + (sentDays === 1 ? '' : 's') + ' ago',
+      due: dueStr,
+      overdue: isOverdue,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -920,6 +948,225 @@ function sendDraftReply(messageId, body) {
   };
 }
 
+function getCalendarEventDetails(messageId) {
+  var msg = GmailApp.getMessageById(messageId);
+  if (!msg) throw new Error('Message not found.');
+
+  var attachments = msg.getAttachments();
+  var icsContent = null;
+  for (var i = 0; i < attachments.length; i++) {
+    var att = attachments[i];
+    if (att.getName().slice(-4).toLowerCase() === '.ics' || att.getContentType() === 'text/calendar') {
+      icsContent = att.getDataAsString();
+      break;
+    }
+  }
+
+  var result = { title: msg.getSubject(), date: null, time: null, location: null, meetLink: null, organizer: null, organizerEmail: null };
+
+  if (icsContent) {
+    // Extract only the VEVENT block to avoid matching DTSTART inside VTIMEZONE definitions
+    var veventMatch = icsContent.match(/BEGIN:VEVENT([\s\S]*?)END:VEVENT/);
+    var ev = veventMatch ? veventMatch[1] : icsContent;
+
+    var dtstartM = ev.match(/DTSTART(?:;TZID=([^;:\r\n]+))?(?:;[^:\r\n]*)?:([^\r\n]+)/);
+    var dtendM   = ev.match(/DTEND(?:;TZID=([^;:\r\n]+))?(?:;[^:\r\n]*)?:([^\r\n]+)/);
+    var summary   = ev.match(/SUMMARY:([^\r\n]+)/);
+    var locLine   = ev.match(/LOCATION:([^\r\n]+)/);
+    var organizer = ev.match(/ORGANIZER(?:;CN=([^;:\r\n]+))?(?:;[^:\r\n]*)?:mailto:([^\r\n\s]+)/i);
+    var descLine  = ev.match(/DESCRIPTION:([^\r\n]+)/);
+
+    if (summary) result.title = summary[1].replace(/\\n/g, ' ').replace(/\\,/g, ',').trim();
+
+    var userTz = Session.getScriptTimeZone();
+
+    function parseDt(tzid, rawVal) {
+      var v = rawVal.trim();
+      var isUtc = /Z$/i.test(v);
+      var clean = v.replace(/Z$/i, '');
+      if (clean.length === 8) {
+        // All-day date
+        return { date: Utilities.parseDate(clean, tzid || userTz, 'yyyyMMdd'), allDay: true };
+      }
+      var dt;
+      if (isUtc) {
+        var iso = clean.slice(0,4)+'-'+clean.slice(4,6)+'-'+clean.slice(6,8)+'T'+clean.slice(9,11)+':'+clean.slice(11,13)+':'+clean.slice(13,15)+'Z';
+        dt = new Date(iso);
+      } else {
+        dt = Utilities.parseDate(clean, tzid || userTz, 'yyyyMMdd\'T\'HHmmss');
+      }
+      return { date: dt, allDay: false };
+    }
+
+    if (dtstartM) {
+      var ps = parseDt(dtstartM[1], dtstartM[2]);
+      result.date = Utilities.formatDate(ps.date, userTz, 'EEEE, MMMM d, yyyy');
+      if (!ps.allDay) {
+        result.time = Utilities.formatDate(ps.date, userTz, 'h:mm a');
+        if (dtendM) {
+          var pe = parseDt(dtendM[1], dtendM[2]);
+          if (!pe.allDay) result.time += ' – ' + Utilities.formatDate(pe.date, userTz, 'h:mm a');
+        }
+      }
+    }
+
+    // Extract Meet link from location or description first
+    var searchText = (locLine ? locLine[1] : '') + ' ' + (descLine ? descLine[1] : '');
+    var meetMatch = searchText.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
+    if (meetMatch) result.meetLink = meetMatch[0];
+
+    // Only set location if it's not just the Meet URL
+    if (locLine) {
+      var loc = locLine[1].replace(/\\n/g, ' ').replace(/\\,/g, ',').trim();
+      if (loc && loc.indexOf('meet.google.com') === -1) result.location = loc;
+    }
+
+    if (organizer) {
+      result.organizer = organizer[1] ? organizer[1].replace(/^"|"$/g,'').trim() : null;
+      result.organizerEmail = organizer[2] ? organizer[2].trim() : null;
+      if (!result.organizer && result.organizerEmail) result.organizer = result.organizerEmail;
+    }
+  }
+
+  return result;
+}
+
+function checkCalendarAuth() {
+  var token = ScriptApp.getOAuthToken();
+  var res = UrlFetchApp.fetch(
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1',
+    { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true }
+  );
+  var code = res.getResponseCode();
+  if (code === 401 || code === 403) return { authorized: false };
+  return { authorized: true };
+}
+
+function rsvpCalendarEvent(messageId, response) {
+  if (response !== 'yes' && response !== 'no') throw new Error('Invalid response.');
+
+  var msg = GmailApp.getMessageById(messageId);
+  if (!msg) throw new Error('Message not found.');
+
+  // Parse UID, title and start time from .ics — needed for both lookup strategies
+  var uid = null, startDate = null, eventTitle = null;
+  var attachments = msg.getAttachments();
+  for (var i = 0; i < attachments.length; i++) {
+    var att = attachments[i];
+    if (att.getName().slice(-4).toLowerCase() !== '.ics' && att.getContentType() !== 'text/calendar') continue;
+    // Unfold ICS lines (continuation lines start with a space/tab per RFC 5545)
+    var ics = att.getDataAsString().replace(/\r?\n[ \t]/g, '');
+    var veventBlock = ics.match(/BEGIN:VEVENT([\s\S]*?)END:VEVENT/);
+    var evBlock = veventBlock ? veventBlock[1] : ics;
+
+    var uidMatch = evBlock.match(/^UID:([^\r\n]+)/m);
+    if (uidMatch) uid = uidMatch[1].trim();
+
+    var summaryMatch = evBlock.match(/^SUMMARY:([^\r\n]+)/m);
+    if (summaryMatch) eventTitle = summaryMatch[1].replace(/\\n/g, ' ').replace(/\\,/g, ',').trim();
+
+    var dtstartMatch = evBlock.match(/DTSTART(?:;TZID=([^;:\r\n]+))?(?:;[^:\r\n]*)?:([^\r\n]+)/);
+    if (dtstartMatch) {
+      var tzid = dtstartMatch[1] ? dtstartMatch[1].trim() : Session.getScriptTimeZone();
+      var rawDt = dtstartMatch[2].trim();
+      var isUtc = /Z$/i.test(rawDt);
+      var clean = rawDt.replace(/Z$/i, '');
+      if (clean.length > 8) {
+        try {
+          startDate = isUtc
+            ? new Date(clean.slice(0,4)+'-'+clean.slice(4,6)+'-'+clean.slice(6,8)+'T'+clean.slice(9,11)+':'+clean.slice(11,13)+':'+clean.slice(13,15)+'Z')
+            : Utilities.parseDate(clean, tzid, 'yyyyMMdd\'T\'HHmmss');
+        } catch(e) {}
+      }
+    }
+    if (uid) break;
+  }
+
+  if (!uid) throw new Error('No UID found in calendar invite attachment.');
+
+  var userEmail = Session.getActiveUser().getEmail();
+  var responseStatus = response === 'yes' ? 'accepted' : 'declined';
+  var guestStatus   = response === 'yes' ? CalendarApp.GuestStatus.YES : CalendarApp.GuestStatus.NO;
+  var token   = ScriptApp.getOAuthToken();
+  var headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+  var rsvped  = false;
+
+  // Strategy 1: Calendar REST API — exact UID match, most reliable
+  var calListRes = UrlFetchApp.fetch(
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=50',
+    { headers: headers, muteHttpExceptions: true }
+  );
+  var calListCode = calListRes.getResponseCode();
+  if (calListCode === 401 || calListCode === 403) throw new Error('NEEDS_AUTH');
+
+  var calIds = (JSON.parse(calListRes.getContentText()).items || []).map(function(c) { return c.id; });
+  var foundCalId = null, foundEvent = null;
+  for (var c = 0; c < calIds.length; c++) {
+    var searchRes = UrlFetchApp.fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calIds[c]) +
+      '/events?iCalUID=' + encodeURIComponent(uid) + '&maxResults=1',
+      { headers: headers, muteHttpExceptions: true }
+    );
+    if (searchRes.getResponseCode() !== 200) continue;
+    var items = JSON.parse(searchRes.getContentText()).items || [];
+    if (items.length) { foundCalId = calIds[c]; foundEvent = items[0]; break; }
+  }
+
+  if (foundEvent) {
+    // Organizer is automatically attending — no RSVP needed
+    if (foundEvent.organizer && foundEvent.organizer.self) {
+      rsvped = true;
+    } else {
+      var attendees = (foundEvent.attendees || []).map(function(a) {
+        if (a.self || a.email === userEmail) return Object.assign({}, a, { responseStatus: responseStatus });
+        return a;
+      });
+      if (!attendees.some(function(a) { return a.self || a.email === userEmail; })) {
+        attendees.push({ email: userEmail, responseStatus: responseStatus });
+      }
+      var patchRes = UrlFetchApp.fetch(
+        'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(foundCalId) +
+        '/events/' + foundEvent.id + '?sendUpdates=all',
+        { method: 'patch', headers: headers, payload: JSON.stringify({ attendees: attendees }), muteHttpExceptions: true }
+      );
+      rsvped = patchRes.getResponseCode() < 300;
+    }
+  }
+
+  // Strategy 2: CalendarApp fallback — time-window search
+  if (!rsvped && startDate) {
+    var windowStart = new Date(startDate.getTime() - 60000);
+    var windowEnd   = new Date(startDate.getTime() + 3600000);
+    var allCals = CalendarApp.getAllCalendars();
+    outer: for (var j = 0; j < allCals.length; j++) {
+      var evts = allCals[j].getEvents(windowStart, windowEnd);
+      for (var k = 0; k < evts.length; k++) {
+        if (eventTitle && evts[k].getTitle() !== eventTitle) continue;
+        var myStatus = evts[k].getMyStatus();
+        // Organizer is automatically attending
+        if (myStatus === CalendarApp.GuestStatus.OWNER) {
+          rsvped = true;
+          break outer;
+        }
+        try { evts[k].setMyStatus(guestStatus); rsvped = true; break outer; } catch(e) {
+          console.log('CalendarApp setMyStatus failed: ' + e.message);
+        }
+      }
+    }
+  }
+
+  if (!rsvped) throw new Error('EVENT_NOT_FOUND');
+
+  var thread = msg.getThread();
+  removeTriageLabels(thread);
+  thread.addLabel(getOrCreateLabel(RESOLVED_LABEL_NAME));
+  thread.moveToArchive();
+  storeDismissed(messageId, 'resolve', msg, thread);
+  removeFollowup(messageId);
+
+  return { status: 'sent', response: response };
+}
+
 // ---------------------------------------------------------------------------
 // Daily digest
 // ---------------------------------------------------------------------------
@@ -1373,52 +1620,4 @@ function escapeHtml_(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function getCurrentUser() {
-  let email = '';
-  try { email = Session.getActiveUser().getEmail() || ''; } catch (e) {}
-  if (!email) {
-    try { email = Session.getEffectiveUser().getEmail() || ''; } catch (e) {}
-  }
-
-  let name = '';
-  try {
-    const token = ScriptApp.getOAuthToken();
-    const res = UrlFetchApp.fetch(
-      'https://people.googleapis.com/v1/people/me?personFields=names',
-      { headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true }
-    );
-    const data = JSON.parse(res.getContentText());
-    if (data && data.names && data.names.length) {
-      name = data.names[0].displayName || '';
-    }
-  } catch (e) {}
-
-  if (!name && email) {
-    name = email.split('@')[0].split(/[._-]/).filter(Boolean)
-      .map(p => p[0].toUpperCase() + p.slice(1).toLowerCase()).join(' ');
-  }
-
-  return { email, name: name || 'You' };
-}
-
-function refineDraft(messageId, currentDraft, instruction, tone) {
-  const apiKey = requireApiKey_();
-  const msg = GmailApp.getMessageById(messageId);
-  const thread = msg.getThread();
-  const subject = thread.getFirstMessageSubject();
-
-  const refined = callClaude_(
-    apiKey,
-    'You are a professional email assistant. The user has a draft reply and wants you to refine it based on an instruction. Return ONLY the revised reply body — no preamble, no subject, no signature unless one was already there.',
-    'Original email subject: ' + subject + '\n\n' +
-    'Tone preference: ' + (tone || 'Warm') + '\n\n' +
-    'Current draft:\n' + (currentDraft || '(empty)') + '\n\n' +
-    'User instruction: ' + instruction + '\n\n' +
-    'Rewrite the draft accordingly.',
-    600
-  ).trim();
-
-  return { draft: refined };
 }
