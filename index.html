@@ -390,13 +390,13 @@ a { color: inherit; text-decoration: none; }
 .stats {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  padding: 18px 22px 8px;
+  gap: 8px;
+  padding: 12px 22px 4px;
 }
 .stat {
   position: relative;
   overflow: hidden;
-  padding: 18px 14px;
+  padding: 10px 10px;
   background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
   border: 1px solid var(--border);
   border-top: 1px solid var(--hairline);
@@ -428,7 +428,7 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(145deg, rgba(255,255,255,0.24), rgba(255,255,255,0.08));
 }
 .stat-num {
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--c);
@@ -673,6 +673,25 @@ a { color: inherit; text-decoration: none; }
   font-size: 11px;
   color: #ffcf5a;
   text-shadow: 0 0 8px rgba(255,207,90,0.5);
+}
+.row-avatar .avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  display: block;
+}
+/* For favicon-style square logos, give them a small inset and white bg
+   so they don't look glued to the avatar's gradient edge. */
+.row-avatar .avatar-img[src*="s2/favicons"] {
+  width: 70%;
+  height: 70%;
+  margin: 15%;
+  background: #fff;
+  border-radius: 8px;
+  object-fit: contain;
+  padding: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 .row-body { min-width: 0; }
 .row-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -968,6 +987,104 @@ a { color: inherit; text-decoration: none; }
   color: var(--fg-mute);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
 }
+
+/* Calendar RSVP card */
+.cal-card {
+  padding: 28px 24px 24px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.cal-card-header {
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.cal-card-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 22px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.cal-card-title {
+  font-size: 18px; font-weight: 700; line-height: 1.3;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+.cal-card-organizer {
+  font-size: 12px; color: var(--fg-dim);
+}
+.cal-card-meta {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.cal-card-row {
+  display: flex; gap: 10px; align-items: center;
+  font-size: 13px; color: var(--fg);
+}
+.cal-card-row-icon {
+  width: 18px; text-align: center; color: var(--fg-dim); flex-shrink: 0; margin-top: 1px;
+}
+.cal-meet-link {
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 650;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: background .15s, border-color .15s, transform .15s;
+  margin-top: 4px;
+}
+.cal-meet-link:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0.1));
+  border-color: var(--hairline);
+  transform: translateY(-1px);
+}
+.cal-rsvp-section {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cal-rsvp-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--fg-dim);
+}
+.cal-rsvp-btns {
+  display: flex; gap: 8px;
+}
+.cal-rsvp-btn {
+  flex: 1;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--fg);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.cal-rsvp-btn:hover { background: rgba(255,255,255,0.1); }
+.cal-rsvp-btn:active { transform: scale(0.97); }
+.cal-rsvp-btn.accept { border-color: oklch(0.72 0.18 145 / 0.6); color: oklch(0.82 0.16 145); }
+.cal-rsvp-btn.accept:hover { background: oklch(0.72 0.18 145 / 0.12); }
+.cal-rsvp-btn.accept.active { background: oklch(0.72 0.18 145 / 0.2); border-color: oklch(0.72 0.18 145); }
+.cal-rsvp-btn.decline { border-color: oklch(0.65 0.2 25 / 0.6); color: oklch(0.75 0.18 25); }
+.cal-rsvp-btn.decline:hover { background: oklch(0.65 0.2 25 / 0.12); }
+.cal-rsvp-btn.decline.active { background: oklch(0.65 0.2 25 / 0.2); border-color: oklch(0.65 0.2 25); }
+.cal-rsvp-btn-icon { font-size: 18px; }
+.cal-rsvp-status {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+}
+.cal-rsvp-status.sent { color: oklch(0.82 0.16 145); border-color: oklch(0.72 0.18 145 / 0.5); }
 
 /* Draft pane */
 .draft {
@@ -1434,6 +1551,17 @@ a { color: inherit; text-decoration: none; }
 }
 .cmdk-foot span { display: flex; align-items: center; gap: 5px; }
 
+/* Force white text in command palette regardless of theme */
+.cmdk { color: #fff; }
+.cmdk-input { color: #fff; }
+.cmdk-input::placeholder { color: rgba(255,255,255,0.4); }
+.cmdk-group-label { color: rgba(255,255,255,0.4); }
+.cmdk-item-icon { color: rgba(255,255,255,0.6); }
+.cmdk-item-label { color: #fff; }
+.cmdk-item-meta { color: rgba(255,255,255,0.45); }
+.cmdk-foot { color: rgba(255,255,255,0.4); }
+.cmdk-kbd { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); }
+
 /* ====== Focus mode ====== */
 .focus-stage {
   flex: 1;
@@ -1791,503 +1919,8 @@ a { color: inherit; text-decoration: none; }
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-<script>/* Mock data — three scenarios. Each scenario is a list of email objects.
-   Categories: escalation | action_required | calendar | fyi | low_priority
-   Reasons feed the attention banner.
-*/
+<script>/* No mock data — all data comes from Gmail via Apps Script. */
 
-const SCENARIOS = {
-  busy: {
-    label: "Busy day",
-    sub: "31 unread · 7 need attention",
-    emails: [
-      {
-        id: "e1",
-        sender: "Priya Raghavan",
-        email: "priya.r@acme-capital.com",
-        avatar: "PR",
-        company: "Acme Capital",
-        subject: "URGENT: Trade execution failing for institutional client",
-        preview: "We've had 3 failed trades in the last hour on the Helix platform. Client is escalating to their compliance team. Need an answer within 30 minutes.",
-        time: "8m ago",
-        timestamp: Date.now() - 8 * 60_000,
-        category: "escalation",
-        priority: 5,
-        unread: true,
-        reasons: ["Critical", "Direct ask", "Deadline"],
-        vip: true,
-        thread: [
-          { from: "Priya Raghavan", text: "We've had 3 failed trades in the last hour on the Helix platform. Client is escalating to their compliance team. Need an answer within 30 minutes.\n\nAttaching execution logs and the error code we're seeing. Can you loop in the platform team?\n\nThis is impacting our top 5 institutional account.", time: "8:42 AM" }
-        ],
-      },
-      {
-        id: "e2",
-        sender: "Marcus Chen",
-        email: "m.chen@board.acme.com",
-        avatar: "MC",
-        company: "Board",
-        subject: "Re: Q3 risk review — your slides for Thursday",
-        preview: "Can you push a draft to me by EOD tomorrow? I want to walk through with the chair before the full board sees it.",
-        time: "42m ago",
-        timestamp: Date.now() - 42 * 60_000,
-        category: "action_required",
-        priority: 4,
-        unread: true,
-        reasons: ["Direct ask", "Deadline", "VIP"],
-        vip: true,
-        thread: [
-          { from: "Marcus Chen", text: "Can you push a draft to me by EOD tomorrow? I want to walk through with the chair before the full board sees it.\n\nFocus areas the chair flagged:\n• Counterparty concentration in the prop book\n• How we're stress-testing the new options flow\n• Vendor risk on the Helix migration\n\nDoesn't need to be polished — bullets are fine.", time: "8:08 AM" }
-        ],
-      },
-      {
-        id: "e3",
-        sender: "Sasha Lindqvist",
-        email: "sasha@platform.internal",
-        avatar: "SL",
-        subject: "Helix v4.2 rollout — sign-off needed by Friday",
-        preview: "Need your go/no-go for the v4.2 release. QA cleared on Monday and we want to ship before the long weekend. Specifically need approval on the new options chain UI.",
-        time: "1h ago",
-        timestamp: Date.now() - 60 * 60_000,
-        category: "action_required",
-        priority: 4,
-        unread: true,
-        reasons: ["Direct ask", "Deadline"],
-        thread: [
-          { from: "Sasha Lindqvist", text: "Need your go/no-go for the v4.2 release. QA cleared on Monday and we want to ship before the long weekend. Specifically need approval on the new options chain UI.\n\nLinks:\n• Staging build\n• QA sign-off doc\n• Risk team's note (they're fine)\n\nIf you can drop a 👍 in this thread we'll start the deploy at 2pm.", time: "7:51 AM" }
-        ],
-      },
-      {
-        id: "e4",
-        sender: "Anita Bose",
-        email: "anita@regreview.gov",
-        avatar: "AB",
-        subject: "Disclosure filing — response required",
-        preview: "Following up on our request from May 14. We need your written response on the Form 31-103 amendments by next Wednesday at the latest.",
-        time: "2h ago",
-        timestamp: Date.now() - 2 * 3600_000,
-        category: "action_required",
-        priority: 5,
-        unread: true,
-        reasons: ["Critical", "Deadline", "Direct ask"],
-        thread: [
-          { from: "Anita Bose", text: "Following up on our request from May 14. We need your written response on the Form 31-103 amendments by next Wednesday at the latest.\n\nIf we don't have a response by then we'll need to schedule a formal meeting.\n\nReply-all on this thread is fine, or you can reach me directly at the number below.", time: "6:30 AM" }
-        ],
-      },
-      {
-        id: "e5",
-        sender: "Calendar",
-        email: "calendar-notification@google.com",
-        avatar: "📅",
-        subject: "Invitation: Risk standup @ 9:30 AM",
-        preview: "Recurring weekly standup. 6 attendees. Conference Room — 8th Floor or join via Meet.",
-        time: "3h ago",
-        timestamp: Date.now() - 3 * 3600_000,
-        category: "calendar",
-        priority: 2,
-        reasons: ["Today"],
-        thread: [
-          { from: "Calendar", text: "When: Today, 9:30 – 10:00 AM\nWhere: Conference Room 8B (or join via Meet)\nAttendees: Marcus, Priya, Sasha, Anita, J. Tao, you\n\nAgenda:\n• Helix v4.2 status\n• Outstanding incidents from yesterday\n• Q3 risk review prep", time: "5:18 AM" }
-        ],
-      },
-      {
-        id: "e6",
-        sender: "Jordan Tao",
-        email: "jtao@acme.com",
-        avatar: "JT",
-        subject: "Lunch Thursday? Quick catch-up",
-        preview: "Free for a quick lunch Thursday? Want to bounce some ideas about the new team structure.",
-        time: "4h ago",
-        timestamp: Date.now() - 4 * 3600_000,
-        category: "action_required",
-        priority: 2,
-        reasons: ["Direct ask"],
-        thread: [
-          { from: "Jordan Tao", text: "Free for a quick lunch Thursday? Want to bounce some ideas about the new team structure.\n\nNo pressure if you're slammed — happy to push to next week.", time: "4:12 AM" }
-        ],
-      },
-      {
-        id: "e7",
-        sender: "Helix Platform",
-        email: "alerts@helix.dev",
-        avatar: "🛠",
-        subject: "Incident #4421 — resolved",
-        preview: "The execution latency spike on EU-West-2 has been mitigated. Root cause: stale connection pool to the order matcher. Post-mortem doc linked.",
-        time: "5h ago",
-        timestamp: Date.now() - 5 * 3600_000,
-        category: "fyi",
-        priority: 2,
-        thread: [
-          { from: "Helix Platform", text: "The execution latency spike on EU-West-2 has been mitigated. Root cause: stale connection pool to the order matcher. Post-mortem doc linked.\n\n• Duration: 14 minutes\n• Affected: ~1,200 retail orders, ~40 institutional\n• Mitigation: rolling restart + connection pool retune\n• Post-mortem: 2pm Thursday in #incidents", time: "3:14 AM" }
-        ],
-      },
-      {
-        id: "e8",
-        sender: "Diana Park",
-        email: "diana@portfolio.internal",
-        avatar: "DP",
-        subject: "Weekly portfolio snapshot — Week 21",
-        preview: "Standard weekly. AUM up 2.3%, net inflows positive across all desks. Three accounts flagged for the wealth team to review.",
-        time: "6h ago",
-        timestamp: Date.now() - 6 * 3600_000,
-        category: "fyi",
-        priority: 1,
-        thread: [
-          { from: "Diana Park", text: "Standard weekly. AUM up 2.3%, net inflows positive across all desks. Three accounts flagged for the wealth team to review.\n\nFull dashboard linked. No action needed from you unless the flagged accounts come up in the Friday review.", time: "2:00 AM" }
-        ],
-      },
-      {
-        id: "e9",
-        sender: "Leon Vasquez",
-        email: "leon@vendor-success.com",
-        avatar: "LV",
-        company: "Vendor",
-        subject: "Following up — pricing for Q4 expansion",
-        preview: "Wanted to make sure my note from last week didn't get lost. Happy to chat or drop a one-pager if easier.",
-        time: "8h ago",
-        timestamp: Date.now() - 8 * 3600_000,
-        category: "low_priority",
-        priority: 1,
-        thread: [
-          { from: "Leon Vasquez", text: "Wanted to make sure my note from last week didn't get lost. Happy to chat or drop a one-pager if easier.\n\nNo pressure on timing — just keeping it on your radar.", time: "Yesterday, 11pm" }
-        ],
-      },
-      {
-        id: "e10",
-        sender: "Stripe",
-        email: "receipts@stripe.com",
-        avatar: "$",
-        subject: "Your monthly invoice — May 2026",
-        preview: "Invoice for the May billing period is ready. Total: $14,820.00. Automatically charged to ending 4421.",
-        time: "10h ago",
-        timestamp: Date.now() - 10 * 3600_000,
-        category: "low_priority",
-        priority: 1,
-        thread: [
-          { from: "Stripe", text: "Invoice for the May billing period is ready. Total: $14,820.00. Automatically charged to ending 4421.\n\nDownload invoice from your dashboard. Tax receipts are attached to the next statement.", time: "Yesterday, 9pm" }
-        ],
-      },
-      {
-        id: "e11",
-        sender: "Maya Okafor",
-        email: "maya.o@acme.com",
-        avatar: "MO",
-        subject: "Quick favour — intro to your contact at Velocity?",
-        preview: "Saw you connected with Reema at Velocity last month. Mind making an intro? Working on something I think would be relevant for her team.",
-        time: "11h ago",
-        timestamp: Date.now() - 11 * 3600_000,
-        category: "action_required",
-        priority: 2,
-        reasons: ["Direct ask"],
-        thread: [
-          { from: "Maya Okafor", text: "Saw you connected with Reema at Velocity last month. Mind making an intro? Working on something I think would be relevant for her team.\n\nHappy to draft the intro myself if it's easier — just need your green light.", time: "Yesterday, 8pm" }
-        ],
-      },
-      {
-        id: "e12",
-        sender: "Calendar",
-        email: "calendar-notification@google.com",
-        avatar: "📅",
-        subject: "Reschedule: 1:1 with Marcus — moved to Wednesday",
-        preview: "Your recurring 1:1 with Marcus Chen has been moved from Tuesday 4pm to Wednesday 11am.",
-        time: "13h ago",
-        timestamp: Date.now() - 13 * 3600_000,
-        category: "calendar",
-        priority: 1,
-      },
-      {
-        id: "e13",
-        sender: "TechCrunch",
-        email: "newsletter@tcrunch.com",
-        avatar: "📰",
-        subject: "The Daily — fintech wrap, May 21",
-        preview: "Robinhood Q1 numbers, the SEC's new options rules, and why three fintech CEOs are sounding alarms.",
-        time: "15h ago",
-        timestamp: Date.now() - 15 * 3600_000,
-        category: "low_priority",
-        priority: 1,
-      },
-      {
-        id: "e14",
-        sender: "Hiring Bot",
-        email: "hiring@acme.com",
-        avatar: "🤖",
-        subject: "3 candidates need your feedback in Greenhouse",
-        preview: "Senior Risk Engineer pipeline — three candidates moved to your stage since yesterday. Slowing down the loop.",
-        time: "Yesterday",
-        timestamp: Date.now() - 24 * 3600_000,
-        category: "action_required",
-        priority: 3,
-        reasons: ["Direct ask"],
-      },
-      {
-        id: "e15",
-        sender: "Sasha Lindqvist",
-        email: "sasha@platform.internal",
-        avatar: "SL",
-        subject: "RE: Helix v4.2 — staging access",
-        preview: "Threading this — staging is now open at the link below. Test login: triage / triage. Let me know if you can poke around before the 2pm deploy window.",
-        time: "Yesterday",
-        timestamp: Date.now() - 26 * 3600_000,
-        category: "fyi",
-        priority: 2,
-      },
-      {
-        id: "e16",
-        sender: "Anita Bose",
-        email: "anita@regreview.gov",
-        avatar: "AB",
-        subject: "Confirmation: filing received",
-        preview: "Confirming we've received your Form 31-103 submission from April 28. We'll be in touch with the response within 14 business days.",
-        time: "Yesterday",
-        timestamp: Date.now() - 28 * 3600_000,
-        category: "fyi",
-        priority: 1,
-      },
-      {
-        id: "e17",
-        sender: "Eng Weekly",
-        email: "weekly@acme.com",
-        avatar: "🛠",
-        subject: "Eng Weekly — incidents, ships, hiring",
-        preview: "This week: Helix v4.2 cleared QA, 2 P2 incidents (both resolved), 1 P1 (Helix latency, post-mortem Thursday), 4 offers out.",
-        time: "2 days ago",
-        timestamp: Date.now() - 48 * 3600_000,
-        category: "fyi",
-        priority: 1,
-      },
-      {
-        id: "e18",
-        sender: "LinkedIn",
-        email: "no-reply@linkedin.com",
-        avatar: "in",
-        subject: "Reema Patel and 4 others endorsed you for Risk Management",
-        preview: "Your network is recognizing your skills. See who endorsed you and the skills they highlighted.",
-        time: "2 days ago",
-        timestamp: Date.now() - 50 * 3600_000,
-        category: "low_priority",
-        priority: 1,
-      },
-      {
-        id: "e19",
-        sender: "Calendar",
-        email: "calendar-notification@google.com",
-        avatar: "📅",
-        subject: "Board prep — Thursday 2pm with Marcus",
-        preview: "60 minute prep block. No agenda yet — Marcus said he'd bring questions.",
-        time: "2 days ago",
-        timestamp: Date.now() - 52 * 3600_000,
-        category: "calendar",
-        priority: 2,
-      },
-      {
-        id: "e20",
-        sender: "Notion",
-        email: "no-reply@notion.so",
-        avatar: "N",
-        subject: "5 documents shared with you this week",
-        preview: "Q3 risk review draft, vendor scorecards, the team's Helix v4.2 launch plan, and two retros.",
-        time: "3 days ago",
-        timestamp: Date.now() - 72 * 3600_000,
-        category: "low_priority",
-        priority: 1,
-      },
-    ],
-  },
-
-  quiet: {
-    label: "Quiet day",
-    sub: "9 unread · 1 needs attention",
-    emails: [
-      {
-        id: "q1",
-        sender: "Marcus Chen",
-        email: "m.chen@board.acme.com",
-        avatar: "MC",
-        subject: "Quick read on the vendor doc when you get a sec",
-        preview: "No rush — sometime this week. Wanted your read before I sign off.",
-        time: "1h ago",
-        timestamp: Date.now() - 3600_000,
-        category: "action_required",
-        priority: 3,
-        unread: true,
-        reasons: ["Direct ask", "VIP"],
-        vip: true,
-        thread: [{ from: "Marcus Chen", text: "No rush — sometime this week. Wanted your read before I sign off.\n\nIt's a five-pager. Most of the meat is in section 3.", time: "10:24 AM" }],
-      },
-      {
-        id: "q2", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
-        subject: "Lunch with Jordan — 12:30 today", preview: "Reminder: lunch with Jordan Tao at 12:30. Tonio's, Bay & King.",
-        time: "2h ago", timestamp: Date.now() - 2*3600_000, category: "calendar", priority: 2,
-      },
-      {
-        id: "q3", sender: "Diana Park", email: "diana@portfolio.internal", avatar: "DP",
-        subject: "Weekly portfolio snapshot — Week 21", preview: "Standard weekly. AUM up 2.3%, net inflows positive across all desks.",
-        time: "4h ago", timestamp: Date.now() - 4*3600_000, category: "fyi", priority: 1,
-      },
-      {
-        id: "q4", sender: "Eng Weekly", email: "weekly@acme.com", avatar: "🛠",
-        subject: "Eng Weekly — light week", preview: "Quiet week. One small ship, no incidents, two offers accepted.",
-        time: "6h ago", timestamp: Date.now() - 6*3600_000, category: "fyi", priority: 1,
-      },
-      {
-        id: "q5", sender: "Stripe", email: "receipts@stripe.com", avatar: "$",
-        subject: "Your monthly invoice — May 2026", preview: "Invoice ready. Total: $14,820.00.",
-        time: "12h ago", timestamp: Date.now() - 12*3600_000, category: "low_priority", priority: 1,
-      },
-      {
-        id: "q6", sender: "TechCrunch", email: "newsletter@tcrunch.com", avatar: "📰",
-        subject: "The Daily — fintech wrap", preview: "Robinhood Q1 numbers and the SEC's new options rules.",
-        time: "1 day ago", timestamp: Date.now() - 24*3600_000, category: "low_priority", priority: 1,
-      },
-      {
-        id: "q7", sender: "Notion", email: "no-reply@notion.so", avatar: "N",
-        subject: "2 documents shared with you", preview: "Vendor scorecards and the team's Helix v4.2 launch plan.",
-        time: "1 day ago", timestamp: Date.now() - 26*3600_000, category: "low_priority", priority: 1,
-      },
-      {
-        id: "q8", sender: "LinkedIn", email: "no-reply@linkedin.com", avatar: "in",
-        subject: "Your weekly stats", preview: "Your posts had 2,341 impressions this week — up 18%.",
-        time: "2 days ago", timestamp: Date.now() - 48*3600_000, category: "low_priority", priority: 1,
-      },
-      {
-        id: "q9", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
-        subject: "Board prep — Thursday 2pm", preview: "60 minute prep block with Marcus.",
-        time: "2 days ago", timestamp: Date.now() - 50*3600_000, category: "calendar", priority: 2,
-      },
-    ],
-  },
-
-  oncall: {
-    label: "On-call hell",
-    sub: "73 unread · 14 critical",
-    emails: [
-      {
-        id: "o1", sender: "PagerDuty", email: "alerts@pagerduty.com", avatar: "🚨",
-        subject: "INCIDENT #4438 — P1 — order matcher unhealthy",
-        preview: "Order matcher health checks failing in EU-West-2. 4 retries, all timed out. Auto-escalating to on-call.",
-        time: "2m ago", timestamp: Date.now() - 2*60_000,
-        category: "escalation", priority: 5, unread: true,
-        reasons: ["Critical", "Deadline"],
-        thread: [{ from: "PagerDuty", text: "Order matcher health checks failing in EU-West-2. 4 retries, all timed out. Auto-escalating to on-call.\n\nDashboard: linked\nRunbook: linked\nAffected: ~800 orders/sec backed up.", time: "8:58 AM" }],
-      },
-      {
-        id: "o2", sender: "Priya Raghavan", email: "priya.r@acme-capital.com", avatar: "PR",
-        subject: "URGENT: trades failing", preview: "Are you seeing this? Three failed in the last 4 minutes. Already getting client calls.",
-        time: "4m ago", timestamp: Date.now() - 4*60_000,
-        category: "escalation", priority: 5, unread: true, vip: true,
-        reasons: ["Critical", "VIP", "Direct ask"],
-        thread: [{ from: "Priya Raghavan", text: "Are you seeing this? Three failed in the last 4 minutes. Already getting client calls.", time: "8:56 AM" }],
-      },
-      {
-        id: "o3", sender: "Datadog", email: "alerts@datadog.com", avatar: "📊",
-        subject: "Alert: p99 latency > 2s on order-api", preview: "p99 latency on order-api crossed 2s threshold (currently 4.3s) for 5+ minutes.",
-        time: "6m ago", timestamp: Date.now() - 6*60_000,
-        category: "escalation", priority: 5, unread: true,
-        reasons: ["Critical", "Deadline"],
-      },
-      {
-        id: "o4", sender: "Sasha Lindqvist", email: "sasha@platform.internal", avatar: "SL",
-        subject: "Re: incident — joining war room", preview: "On the bridge. Pulling up the matcher logs now. Looks like the same pattern as last Tuesday's incident.",
-        time: "8m ago", timestamp: Date.now() - 8*60_000,
-        category: "fyi", priority: 3, unread: true,
-      },
-      {
-        id: "o5", sender: "PagerDuty", email: "alerts@pagerduty.com", avatar: "🚨",
-        subject: "INCIDENT #4437 — P2 — connection pool warnings",
-        preview: "Pre-cursor alert from 22 minutes ago — connection pool nearing capacity. Now likely related to #4438.",
-        time: "22m ago", timestamp: Date.now() - 22*60_000,
-        category: "escalation", priority: 4, unread: true,
-        reasons: ["Critical"],
-      },
-      {
-        id: "o6", sender: "Anita Bose", email: "anita@regreview.gov", avatar: "AB",
-        subject: "Trade execution failure — need incident report",
-        preview: "Our monitoring picked up the failed trades. Per the disclosure rules we'll need an incident report within 24h.",
-        time: "30m ago", timestamp: Date.now() - 30*60_000,
-        category: "action_required", priority: 5, unread: true,
-        reasons: ["Critical", "Deadline", "Direct ask"],
-      },
-      {
-        id: "o7", sender: "Marcus Chen", email: "m.chen@board.acme.com", avatar: "MC",
-        subject: "What's going on with Helix?", preview: "Getting questions from the board. Can someone send me a one-liner I can forward?",
-        time: "35m ago", timestamp: Date.now() - 35*60_000,
-        category: "action_required", priority: 5, unread: true, vip: true,
-        reasons: ["VIP", "Direct ask", "Deadline"],
-      },
-      {
-        id: "o8", sender: "Calendar", email: "calendar@google.com", avatar: "📅",
-        subject: "Skipped: Risk standup — moved to async", preview: "Standup cancelled. Recording your notes async.",
-        time: "1h ago", timestamp: Date.now() - 3600_000,
-        category: "calendar", priority: 1,
-      },
-      {
-        id: "o9", sender: "Status page", email: "noreply@statuspage.io", avatar: "🛠",
-        subject: "Helix status — Investigating",
-        preview: "We are investigating reports of failed trade executions. Will update every 15 minutes.",
-        time: "1h ago", timestamp: Date.now() - 65*60_000,
-        category: "fyi", priority: 2,
-      },
-      {
-        id: "o10", sender: "Customer Success", email: "cs@acme.com", avatar: "CS",
-        subject: "5 client escalations queued", preview: "Five top-tier clients have called in about failed trades. CS is holding them for now.",
-        time: "1h ago", timestamp: Date.now() - 70*60_000,
-        category: "escalation", priority: 5,
-        reasons: ["Critical", "Deadline"],
-      },
-      {
-        id: "o11", sender: "Eng All Hands", email: "allhands@acme.com", avatar: "🛠",
-        subject: "Incident response — all hands on deck", preview: "All available engineers, please join the war room. Channel: #inc-4438",
-        time: "2h ago", timestamp: Date.now() - 2*3600_000,
-        category: "action_required", priority: 4,
-      },
-      {
-        id: "o12", sender: "TechCrunch", email: "newsletter@tcrunch.com", avatar: "📰",
-        subject: "The Daily", preview: "Today in fintech.",
-        time: "3h ago", timestamp: Date.now() - 3*3600_000,
-        category: "low_priority", priority: 1,
-      },
-      {
-        id: "o13", sender: "Notion", email: "no-reply@notion.so", avatar: "N",
-        subject: "Doc shared: runbook v3", preview: "Sasha shared the updated matcher runbook.",
-        time: "4h ago", timestamp: Date.now() - 4*3600_000,
-        category: "fyi", priority: 2,
-      },
-      {
-        id: "o14", sender: "Stripe", email: "receipts@stripe.com", avatar: "$",
-        subject: "Monthly invoice", preview: "Invoice ready.",
-        time: "6h ago", timestamp: Date.now() - 6*3600_000,
-        category: "low_priority", priority: 1,
-      },
-    ],
-  },
-};
-
-const VIPS = [
-  { name: "Marcus Chen",     email: "m.chen@board.acme.com",    role: "Board chair",       last: "42m ago" },
-  { name: "Priya Raghavan",  email: "priya.r@acme-capital.com", role: "Top inst. client",  last: "8m ago" },
-  { name: "Anita Bose",      email: "anita@regreview.gov",      role: "Regulator",         last: "2h ago" },
-  { name: "@acme.com",       email: "@acme.com",                role: "Internal — domain", last: "—" },
-];
-
-const FOLLOWUPS = [
-  { id: "f1", to: "Reema Patel",      subject: "Re: Velocity partnership next steps", sent: "8 days ago", due: "Overdue 3 days", overdue: true },
-  { id: "f2", to: "Leon Vasquez",     subject: "Re: Q4 pricing",                       sent: "5 days ago", due: "Due tomorrow",   overdue: false },
-  { id: "f3", to: "Hiring committee", subject: "Re: senior risk eng offer",            sent: "2 days ago", due: "Due in 3 days",  overdue: false },
-];
-
-const TASKS = [
-  { id: "t1", text: "Approve Helix v4.2 release",                    priority: "high",   due: "Friday",     source: "Sasha Lindqvist", done: false },
-  { id: "t2", text: "Send Q3 risk review draft to Marcus",           priority: "high",   due: "EOD tomorrow", source: "Marcus Chen",   done: false },
-  { id: "t3", text: "Respond to Form 31-103 amendments",             priority: "high",   due: "Next Wed",   source: "Anita Bose",      done: false },
-  { id: "t4", text: "Intro Maya to Reema at Velocity",               priority: "medium", due: "This week",  source: "Maya Okafor",     done: false },
-  { id: "t5", text: "Review 3 candidates in Greenhouse",             priority: "medium", due: "This week",  source: "Hiring Bot",      done: false },
-  { id: "t6", text: "Confirm lunch with Jordan Thursday",            priority: "low",    due: "—",          source: "Jordan Tao",      done: true  },
-];
-
-window.SCENARIOS = SCENARIOS;
-window.VIPS = VIPS;
-window.FOLLOWUPS = FOLLOWUPS;
-window.TASKS = TASKS;
 </script>
 <script type="text/babel" data-presets="react">
 // tweaks-panel.jsx
@@ -2882,7 +2515,6 @@ const Rail = ({ view, setView, totals, user, logoUrl }) => {
         <div className="rail-label">Workspace</div>
         {[
           ["inbox", "Inbox", totals.inbox],
-          ["attention", "Attention", totals.attention],
           ["tasks", "Tasks", totals.tasks],
           ["vips", "VIPs & follow-ups", totals.vipFollow],
           ["resolved", "Resolved", totals.resolved],
@@ -2974,8 +2606,12 @@ const Stats = ({ emails, activeCat, setActiveCat }) => {
 };
 
 const AttentionBanner = ({ emails, style, onClick }) => {
-  const items = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
-  if (!items.length) return null;
+  const items = emails.filter(e =>
+    e.category === "escalation" ||
+    e.category === "action_required" ||
+    e.vip ||
+    (e.category === "calendar" && e.reasons && e.reasons.some(r => /deadline/i.test(r)))
+  );  if (!items.length) return null;
   const reasons = items.reduce((a,e) => {
     (e.reasons||[]).forEach(r => a[r] = (a[r]||0)+1);
     return a;
@@ -3011,10 +2647,8 @@ const AttentionBanner = ({ emails, style, onClick }) => {
 
 const Tabs = ({ emails, activeTab, setActiveTab }) => {
   const counts = emails.reduce((a,e) => { a[e.category] = (a[e.category]||0)+1; return a; }, {});
-  const attn = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation").length;
   const tabs = [
     ["all", "All", emails.length],
-    ["attention", "Attention", attn],
     ...CATS.map(c => [c.k, c.lbl, counts[c.k] || 0]),
   ];
   return (
@@ -3051,7 +2685,16 @@ const Row = ({ email, selected, checked, onSelect, onCheck, onAction, dismissing
         {checked && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
       </button>
 
-      <div className={`row-avatar ${email.vip ? "vip" : ""}`}>{email.avatar}</div>
+      <div className={`row-avatar ${email.vip ? "vip" : ""}`}>
+        {email.photo ? (
+          <img
+            className="avatar-img"
+            src={email.photo}
+            alt=""
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+        ) : email.avatar}
+      </div>
 
       <div className="row-body">
         <div className="row-meta">
@@ -3128,6 +2771,152 @@ const ContextPane = ({
 
 const initialsOf = (s) => (s || "").split(/[\s@.]+/).filter(Boolean).map(p => p[0]).join("").slice(0,2).toUpperCase() || "·";
 
+const CalendarCard = ({ email, onResolve, onTrash }) => {
+  const [event, setEvent] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [rsvp, setRsvp] = React.useState(null);
+  const [sending, setSending] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+  const [rsvpError, setRsvpError] = React.useState(null);
+  const [needsAuth, setNeedsAuth] = React.useState(false);
+
+  React.useEffect(() => {
+    setLoading(true);
+    setEvent(null);
+    setRsvp(null);
+    setSent(false);
+    setRsvpError(null);
+    setNeedsAuth(false);
+    if (!IS_APPS_SCRIPT) { setLoading(false); return; }
+    gsRun("getCalendarEventDetails", email.id)
+      .then(d => { setEvent(d); setLoading(false); })
+      .catch(() => setLoading(false));
+    gsRun("checkCalendarAuth")
+      .then(r => { if (r && !r.authorized) setNeedsAuth(true); })
+      .catch(() => {});
+  }, [email.id]);
+
+  const handleRsvp = (response) => {
+    setRsvp(response);
+    setSending(true);
+    setRsvpError(null);
+    if (!IS_APPS_SCRIPT) { setTimeout(() => { setSending(false); setSent(true); }, 800); return; }
+    gsRun("rsvpCalendarEvent", email.id, response)
+      .then(() => { setSending(false); setSent(true); })
+      .catch(err => {
+        setSending(false);
+        setRsvp(null);
+        const msg = err && err.message ? err.message : '';
+        if (msg === 'NEEDS_AUTH' || msg.indexOf('NEEDS_AUTH') !== -1) {
+          setNeedsAuth(true);
+          setRsvpError(null);
+        } else if (msg === 'EVENT_NOT_FOUND' || msg.indexOf('EVENT_NOT_FOUND') !== -1) {
+          setRsvpError('Event not found in your calendar. Open the invite in Gmail first to add it.');
+        } else {
+          setRsvpError(msg || 'Failed to update RSVP');
+        }
+      });
+  };
+
+  const rsvpLabel = { yes: "Accepted", no: "Declined" };
+
+  return (
+    <div className="thread" style={{overflowY:"auto"}}>
+      <div className="thread-head">
+        <div className="thread-subject">{email.subject}</div>
+        <div className="thread-meta">
+          <span className="thread-meta-pill" style={{"--c": CAT_VAR[email.category]}}>Calendar</span>
+          {(email.reasons||[]).map(r => (
+            <span key={r} className="thread-meta-pill" style={{"--c": "var(--fg-mute)"}}>{r}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="cal-card">
+        {loading && (
+          <div style={{textAlign:"center",padding:"20px 0",color:"var(--fg-dim)",fontSize:13}}>Loading event details…</div>
+        )}
+
+        {!loading && (
+          <>
+            <div className="cal-card-header">
+              <div className="cal-card-icon">📅</div>
+              <div>
+                <div className="cal-card-title">{event ? event.title : email.subject}</div>
+                {event && event.organizer && (
+                  <div className="cal-card-organizer">Organized by {event.organizer}</div>
+                )}
+              </div>
+            </div>
+
+            {event && (
+              <div className="cal-card-meta">
+                {event.date && (
+                  <div className="cal-card-row">
+                    <span className="cal-card-row-icon">📆</span>
+                    <span>{event.date}{event.time ? " · " + event.time : ""}</span>
+                  </div>
+                )}
+                {(event.location || event.meetLink) && (
+                  <div className="cal-card-row">
+                    <span className="cal-card-row-icon">📍</span>
+                    <span style={{flex:1}}>
+                      {event.location && <span>{event.location}</span>}
+                      {event.meetLink && (
+                        <>{event.location && <br/>}<a className="cal-meet-link" href={event.meetLink} target="_blank" rel="noopener noreferrer">🎥 Join Google Meet</a></>
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="cal-rsvp-section">
+              <div className="cal-rsvp-label">RSVP</div>
+              {needsAuth ? (
+                <div style={{fontSize:12,lineHeight:1.5,padding:"10px 12px",borderRadius:8,background:"rgba(255,140,66,0.1)",border:"1px solid rgba(255,140,66,0.3)",color:"oklch(0.82 0.14 55)"}}>
+                  Calendar access not yet granted. To fix:<br/>
+                  1. Open <strong>script.google.com</strong> → your project<br/>
+                  2. Run <code style={{fontFamily:"var(--font-mono)",fontSize:11}}>getCurrentUser</code><br/>
+                  3. Accept the <strong>Google Calendar</strong> permission<br/>
+                  4. Reload this app
+                </div>
+              ) : sent ? (
+                <div className="cal-rsvp-status sent">
+                  {rsvpLabel[rsvp] || "Response sent"} — email archived
+                </div>
+              ) : (
+                <>
+                  <div className="cal-rsvp-btns">
+                    <button
+                      className={`cal-rsvp-btn accept${rsvp === "yes" ? " active" : ""}`}
+                      disabled={sending}
+                      onClick={() => handleRsvp("yes")}
+                    >
+                      ✓ Accept
+                    </button>
+                    <button
+                      className={`cal-rsvp-btn decline${rsvp === "no" ? " active" : ""}`}
+                      disabled={sending}
+                      onClick={() => handleRsvp("no")}
+                    >
+                      ✕ Decline
+                    </button>
+                  </div>
+                  {rsvpError && (
+                    <div style={{fontSize:12,color:"oklch(0.75 0.18 25)",marginTop:4}}>{rsvpError}</div>
+                  )}
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+    </div>
+  );
+};
+
 const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
   if (!email) return (
     <div className="empty-context">
@@ -3138,6 +2927,10 @@ const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
       </div>
     </div>
   );
+
+  if (email.category === "calendar") {
+    return <CalendarCard email={email} onResolve={onResolve} onTrash={onTrash} />;
+  }
 
   const thread = email.thread || [{ from: email.sender, text: email.preview, time: email.time }];
 
@@ -3430,7 +3223,7 @@ const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
           <div className="tracker-title">How it works</div>
         </div>
         <div style={{fontSize:12,color:"var(--fg-mute)",lineHeight:1.55}}>
-          Sending a reply automatically tracks it. If they don't respond within your follow-up window, the thread reappears in your Attention queue with an "Overdue" chip.
+          Sending a reply automatically tracks it. If they don't respond within your follow-up window, the thread reappears in your inbox with an "Overdue" chip.
         </div>
       </div>
     </div>
@@ -3455,9 +3248,8 @@ const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetV
   }, [open]);
 
   const commands = [
-    { id:"focus", group:"Actions", icon:"⚡", label:"Enter focus mode", meta:"Cycle through attention queue", run: () => onToggleFocus() },
+    { id:"focus", group:"Actions", icon:"⚡", label:"Enter focus mode", meta:"Focus on priority emails", run: () => onToggleFocus() },
     { id:"v_inbox", group:"Navigation", icon:"📥", label:"Go to inbox", meta:"G then I", run: () => onSetView("inbox") },
-    { id:"v_attn", group:"Navigation", icon:"⚡", label:"Go to attention queue", meta:"G then A", run: () => onSetView("attention") },
     { id:"v_tasks", group:"Navigation", icon:"✓", label:"Go to tasks", meta:"G then T", run: () => onSetView("tasks") },
     { id:"v_vips", group:"Navigation", icon:"★", label:"Go to VIPs & follow-ups", meta:"", run: () => onSetView("vips") },
   ];
@@ -3548,8 +3340,12 @@ const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetV
 
 const FocusMode = ({ emails, onExit, onAction, onOpenDraft }) => {
   const [idx, setIdx] = React.useState(0);
-  const items = emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation" || e.category === "action_required");
-
+  const items = emails.filter(e =>
+    e.category === "escalation" ||
+    e.category === "action_required" ||
+    e.vip ||
+    (e.category === "calendar" && e.reasons && e.reasons.some(r => /deadline/i.test(r)))
+  );
   React.useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowRight" || e.key === "j") { setIdx(i => Math.min(items.length - 1, i + 1)); }
@@ -3573,7 +3369,7 @@ const FocusMode = ({ emails, onExit, onAction, onOpenDraft }) => {
       <div className="focus-card-wrap">
         <div className="focus-card" style={{textAlign:"center"}}>
           <div style={{fontSize:32,marginBottom:12}}>🌿</div>
-          <div className="focus-subject">Inbox zero in attention</div>
+          <div className="focus-subject">Inbox zero</div>
           <div className="focus-body" style={{textAlign:"center"}}>Nothing critical right now. Take a break or check the full inbox.</div>
           <button className="thread-btn primary" onClick={onExit} style={{margin:"0 auto"}}>Back to inbox</button>
         </div>
@@ -3657,6 +3453,13 @@ const timeAgo = (iso) => {
   return d + "d ago";
 };
 
+const faviconFor = (emailAddr) => {
+  if (!emailAddr) return null;
+  const domain = String(emailAddr).split("@").pop().trim().toLowerCase();
+  if (!domain || !domain.includes(".")) return null;
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+};
+
 const mapServerEmail = (e) => ({
   id: e.id,
   sender: e.sender_name || e.sender_email || "(unknown)",
@@ -3672,7 +3475,7 @@ const mapServerEmail = (e) => ({
   reasons: e.attentionReasons || [],
   vip: !!(e.attentionSignals && e.attentionSignals.vip),
   thread: null,
-  photo: e.photo,
+  photo: e.photo || faviconFor(e.sender_email),
   isFollowup: !!e.isFollowup,
   hasFollowup: !!e.hasFollowup,
 });
@@ -3711,7 +3514,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 const TONE_DRAFTS = {
   Direct: (e) => `Hi ${e.sender.split(" ")[0]},\n\nGot it — here's where I am:\n\n• ${e.subject.replace(/^(re:|fwd:)\s*/i, "")} — handled.\n• Will keep you posted as it moves.\n\nLet me know if anything else.\n\nJamie`,
   Warm: (e) => `Hi ${e.sender.split(" ")[0]},\n\nThanks for the note — appreciate you flagging this.\n\nI'll take a look and get back to you with specifics by EOD. If there's anything urgent in the meantime, drop me a line.\n\nBest,\nJamie`,
-  Formal: (e) => `Dear ${e.sender.split(" ")[0]},\n\nThank you for your email regarding ${e.subject.toLowerCase()}.\n\nI have reviewed the matter and will provide a substantive response within one business day. Please reach out should you require anything in the interim.\n\nKind regards,\nJamie Tran`,
+  Formal: (e) => `Dear ${e.sender.split(" ")[0]},\n\nThank you for your email regarding ${e.subject.toLowerCase()}.\n\nI have reviewed the matter and will provide a substantive response within one business day. Please reach out should you require anything in the interim.\n\nKind regards,`,
 };
 
 const App = () => {
@@ -3726,8 +3529,7 @@ const App = () => {
   }, [tw.theme, tw.density, tw.motion, tw.accentHue]);
 
   // Core state
-  const [emails, setEmails] = useState(() => SCENARIOS.busy.emails);
-  const sub = SCENARIOS.busy.sub;
+  const [emails, setEmails] = useState([]);
   const [view, setView] = useState("inbox");
   const [activeTab, setActiveTab] = useState("all");
   const [activeCat, setActiveCat] = useState(null);
@@ -3737,11 +3539,11 @@ const App = () => {
   const [lastChecked, setLastChecked] = useState(null);
   const [dismissingIds, setDismissingIds] = useState(new Set());
   const [contextTab, setContextTab] = useState("thread");
-  const [tasks, setTasks] = useState(() => IS_APPS_SCRIPT ? [] : [...TASKS]);
-  const [vips, setVips] = useState(() => IS_APPS_SCRIPT ? [] : [...VIPS]);
-  const [followups] = useState(() => [...FOLLOWUPS]);
+  const [tasks, setTasks] = useState([]);
+  const [vips, setVips] = useState([]);
+  const [followups, setFollowups] = useState([]);
   const [loadingInbox, setLoadingInbox] = useState(IS_APPS_SCRIPT);
-  const [user, setUser] = useState(() => IS_APPS_SCRIPT ? { name: "Loading…", email: "" } : { name: "Jamie Tran", email: "jamie@acme.com" });
+  const [user, setUser] = useState({ name: "Loading…", email: "" });
   const [toasts, setToasts] = useState([]);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
@@ -3767,7 +3569,20 @@ const App = () => {
       })
       .then(classified => {
         if (classified && classified.emails) {
-          setEmails(classified.emails.map(mapServerEmail));
+          const mapped = classified.emails.map(mapServerEmail);
+          setEmails(mapped);
+          // After classification, ask the server for People API photos for
+          // real contacts. These override the favicon fallback already set
+          // in mapServerEmail.
+          const slim = classified.emails
+            .filter(e => e.sender_email)
+            .map(e => ({ sender_email: e.sender_email }));
+          if (slim.length) {
+            gsRun("fetchContactPhotosForEmails", slim).then(photoMap => {
+              if (!photoMap || typeof photoMap !== "object") return;
+              setEmails(prev => prev.map(em => photoMap[em.email] ? { ...em, photo: photoMap[em.email] } : em));
+            }).catch(() => {});
+          }
         }
       })
       .catch(e => pushToast("Inbox load failed: " + (e.message || e)))
@@ -3779,6 +3594,7 @@ const App = () => {
     refreshInbox();
     gsRun("getTasks").then(t => Array.isArray(t) && setTasks(t.map(mapTask))).catch(() => {});
     gsRun("getVipSenders").then(v => Array.isArray(v) && setVips(v.map(mapVip))).catch(() => {});
+    gsRun("getFollowups").then(f => Array.isArray(f) && setFollowups(f)).catch(() => {});
     gsRun("getCurrentUser").then(u => u && u.email && setUser({ name: u.name || u.email.split("@")[0], email: u.email })).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -3804,12 +3620,7 @@ const App = () => {
   const filtered = useMemo(() => {
     let list = emails.filter(e => !dismissingIds.has(e.id));
 
-    if (view === "attention") {
-      list = list.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
-    }
-    if (activeTab === "attention") {
-      list = list.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation");
-    } else if (activeTab !== "all") {
+    if (activeTab !== "all") {
       list = list.filter(e => e.category === activeTab);
     }
     if (activeCat) list = list.filter(e => e.category === activeCat);
@@ -3827,14 +3638,13 @@ const App = () => {
       if (ao !== bo) return ao - bo;
       return (b.priority || 0) - (a.priority || 0);
     });
-  }, [emails, view, activeTab, activeCat, search, dismissingIds]);
+  }, [emails, activeTab, activeCat, search, dismissingIds]);
 
   const selectedEmail = useMemo(() => emails.find(e => e.id === selectedId), [emails, selectedId]);
 
   // Counts for rail
   const totals = useMemo(() => ({
     inbox: emails.length,
-    attention: emails.filter(e => (e.reasons && e.reasons.length) || e.category === "escalation").length,
     tasks: tasks.filter(t => !t.done).length,
     vipFollow: vips.length + followups.length,
     resolved: 0,
@@ -4157,8 +3967,7 @@ const App = () => {
           if (v === "tasks") setContextTab("tasks");
           else if (v === "vips") setContextTab("tracker");
           else setContextTab("thread");
-          if (v === "attention") setActiveTab("attention");
-          else if (v === "inbox") setActiveTab("all");
+          if (v === "inbox") setActiveTab("all");
         }}
         totals={totals}
         user={user}
@@ -4170,7 +3979,6 @@ const App = () => {
           <div>
             <div className="topbar-title">
               {view === "inbox" && "Inbox"}
-              {view === "attention" && "Attention queue"}
               {view === "tasks" && "Tasks"}
               {view === "vips" && "VIPs & follow-ups"}
               {view === "resolved" && "Resolved"}
@@ -4179,7 +3987,7 @@ const App = () => {
             <div className="topbar-sub">
               {loadingInbox
                 ? "Fetching inbox…"
-                : `${emails.length} email${emails.length === 1 ? "" : "s"} · ${totals.attention} need attention`}
+                : `${emails.length} email${emails.length === 1 ? "" : "s"}`}
             </div>
           </div>
 
@@ -4214,7 +4022,7 @@ const App = () => {
           </button>
         </header>
 
-        {(view === "inbox" || view === "attention") && (
+        {view === "inbox" && (
           <>
             <Stats emails={emails} activeCat={activeCat} setActiveCat={setActiveCat} />
             <AttentionBanner
@@ -4222,8 +4030,6 @@ const App = () => {
               style={tw.attentionStyle}
               onClick={() => setFocusOpen(true)}
             />
-            <EmailListTabs emails={emails} activeTab={activeTab} setActiveTab={setActiveTab} />
-
             {checked.size > 0 && (
               <div className="batch-bar">
                 <span className="batch-count">{checked.size} selected</span>
@@ -4297,7 +4103,7 @@ const App = () => {
         )}
       </main>
 
-      {(view === "inbox" || view === "attention") && (
+      {view === "inbox" && (
         <ContextPane
           contextTab={contextTab}
           setContextTab={setContextTab}
