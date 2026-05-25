@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Triage — Inbox</title>
+<title>QuestFlow — Inbox</title>
 <base target="_top">
 <style>/* =========================================================================
    Triage — glassmorphic dark/green (matches original aesthetic)
@@ -19,12 +19,12 @@
   --accent-bg: rgba(0, 200, 150, 0.08);
   --accent-glow: 0 0 40px rgba(0, 200, 150, 0.16);
 
-  /* Category colors */
-  --c-escalation: #ff4d4d;
-  --c-action:     #ff8c42;
-  --c-calendar:   #00c04b;
-  --c-fyi:        #5b9cf6;
-  --c-low:        #909090;
+  /* Category colors — muted professional */
+  --c-escalation: #D45C5C;
+  --c-action:     #C49A40;
+  --c-calendar:   #00A651;
+  --c-fyi:        #004D3A;
+  --c-low:        #7C8C88;
 
   --r-lg: 22px;
   --r-md: 18px;
@@ -181,7 +181,6 @@ a { color: inherit; text-decoration: none; }
   gap: 0;
 }
 .shell.no-right { grid-template-columns: 240px 1fr; }
-.shell.focus { grid-template-columns: 1fr; }
 
 /* ====== Left rail ====== */
 .rail {
@@ -285,14 +284,79 @@ a { color: inherit; text-decoration: none; }
 }
 
 .rail-foot {
-  margin-top: auto;
   padding: 14px;
   border-top: 1px solid var(--line-soft);
   display: flex; align-items: center; gap: 10px;
   font-size: 12px;
   color: var(--fg-mute);
   background: rgba(255,255,255,0.02);
+  cursor: pointer;
+  user-select: none;
 }
+.rail-foot:hover { background: rgba(255,255,255,0.04); }
+.settings-panel {
+  border-top: 1px solid var(--line-soft);
+  background: rgba(255,255,255,0.02);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: 2px;
+}
+.settings-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.settings-row-text { flex: 1; min-width: 0; }
+.settings-row-title { font-size: 12px; font-weight: 700; color: var(--fg); line-height: 1.3; }
+.settings-row-sub { font-size: 10px; color: var(--fg-dim); margin-top: 2px; line-height: 1.4; }
+.settings-row-status { font-size: 10px; color: var(--fg-dim); margin-top: 4px; }
+.toggle-wrap { flex-shrink: 0; margin-top: 1px; }
+.toggle {
+  position: relative; width: 36px; height: 20px;
+  background: var(--border); border-radius: 999px;
+  cursor: pointer; transition: background .2s;
+  border: none;
+}
+.toggle.on { background: #00c896; }
+.toggle::after {
+  content: ""; position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.toggle.on::after { transform: translateX(16px); }
+.settings-btn {
+  font-size: 11px; padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.settings-btn:hover { color: var(--fg); border-color: var(--hairline); }
+.settings-select {
+  font-size: 11px; padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  cursor: pointer; flex-shrink: 0;
+  outline: none;
+  transition: color .15s, border-color .15s;
+}
+.settings-select:hover { color: var(--fg); border-color: var(--hairline); }
+:root[data-theme="light"] .settings-select { background: rgba(255,255,255,0.7); }
 .user-avatar {
   width: 28px; height: 28px;
   border-radius: 10px;
@@ -368,6 +432,75 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--border);
   border-radius: 4px;
 }
+.search-icon-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--fg-mute); display: flex; align-items: center; padding: 0;
+  flex-shrink: 0;
+}
+.search-icon-btn:hover { color: var(--accent); }
+.search-icon-btn.searching { animation: spin 1s linear infinite; transform-origin: center; }
+.nl-search-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 12px; color: var(--fg-dim);
+  background: rgba(0,200,150,0.06);
+  border-bottom: 1px solid rgba(0,200,150,0.15);
+}
+.nl-search-header em { color: var(--fg); font-style: normal; font-weight: 600; }
+.nl-search-header button {
+  background: none; border: none; color: var(--fg-dim);
+  cursor: pointer; font-size: 13px; padding: 0 4px;
+}
+.nl-search-header button:hover { color: var(--fg); }
+.row-reason {
+  font-size: 11px; color: var(--accent); font-style: italic;
+  margin-top: 3px; opacity: 0.85;
+}
+/* Auto-bundle */
+.bundle-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer; user-select: none;
+  background: rgba(255,255,255,0.025);
+  border-bottom: 1px solid var(--line-soft);
+  transition: background .12s;
+}
+.bundle-header:hover { background: rgba(255,255,255,0.05); }
+.bundle-favicon {
+  width: 18px; height: 18px; border-radius: 4px; object-fit: contain;
+  background: rgba(255,255,255,0.08); flex-shrink: 0;
+}
+.bundle-initials {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--accent-bg); color: var(--accent);
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.bundle-name { font-size: 12px; font-weight: 600; color: var(--fg); flex: 1; }
+.bundle-count {
+  font-size: 10px; font-weight: 700;
+  background: var(--accent-bg); color: var(--accent);
+  padding: 2px 7px; border-radius: 20px; flex-shrink: 0;
+}
+.bundle-chevron {
+  font-size: 11px; color: var(--fg-dim);
+  transition: transform .15s; line-height: 1;
+}
+.bundle-chevron.open { transform: rotate(90deg); }
+:root[data-theme="light"] .bundle-header { background: rgba(0,0,0,0.02); }
+:root[data-theme="light"] .bundle-header:hover { background: rgba(0,0,0,0.04); }
+.bundle-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: none; color: var(--fg-mute); cursor: pointer;
+  transition: all .15s; flex-shrink: 0;
+}
+.bundle-btn:hover { color: var(--fg); border-color: var(--fg-dim); }
+.bundle-btn.active {
+  background: var(--accent-bg); border-color: rgba(0,200,150,0.4); color: var(--accent);
+}
 
 .icon-btn {
   width: 34px; height: 34px;
@@ -391,7 +524,7 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
-  padding: 12px 22px 4px;
+  padding: 12px 22px 10px;
 }
 .stat {
   position: relative;
@@ -449,7 +582,7 @@ a { color: inherit; text-decoration: none; }
 
 /* Attention banner — slim variant */
 .attention-banner {
-  margin: 4px 22px 0;
+  margin: 28px 22px 0;
   padding: 14px 18px;
   display: flex; align-items: center; gap: 14px;
   background: linear-gradient(135deg, rgba(255,140,66,0.18), rgba(255,77,77,0.10));
@@ -502,17 +635,7 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-mono);
   letter-spacing: 0.02em;
 }
-.attention-go {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--fg-mute);
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  letter-spacing: 0.04em;
-  background: rgba(255,255,255,0.06);
-  z-index: 1;
-}
+
 
 /* Tab bar */
 .tabs {
@@ -562,11 +685,11 @@ a { color: inherit; text-decoration: none; }
 .list {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 22px 60px;
+  padding: 4px 22px 60px;
   display: flex; flex-direction: column; gap: 6px;
 }
 .list-section-label {
-  padding: 16px 4px 6px;
+  padding: 4px 4px 6px;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -597,8 +720,8 @@ a { color: inherit; text-decoration: none; }
   display: grid;
   grid-template-columns: 18px 40px 1fr auto;
   gap: 14px;
-  align-items: center;
-  min-height: 76px;
+  align-items: start;
+  min-height: 88px;
   transition: transform .18s, box-shadow .18s, border-color .18s, background .18s;
   animation: rise .24s ease both;
 }
@@ -640,6 +763,7 @@ a { color: inherit; text-decoration: none; }
   display: grid; place-items: center;
   background: rgba(255,255,255,0.04);
   transition: background .12s, border-color .12s;
+  align-self: center;
 }
 .row-check:hover { border-color: var(--hairline); }
 .row-check.checked {
@@ -665,6 +789,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--fg);
   flex-shrink: 0;
   position: relative;
+  align-self: center;
 }
 .row-avatar.vip::after {
   content: "★";
@@ -675,26 +800,22 @@ a { color: inherit; text-decoration: none; }
   text-shadow: 0 0 8px rgba(255,207,90,0.5);
 }
 .row-avatar .avatar-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
   display: block;
 }
-/* For favicon-style square logos, give them a small inset and white bg
-   so they don't look glued to the avatar's gradient edge. */
+/* Favicon-style logos — contain so they don't crop */
 .row-avatar .avatar-img[src*="s2/favicons"] {
-  width: 70%;
-  height: 70%;
-  margin: 15%;
-  background: #fff;
-  border-radius: 8px;
   object-fit: contain;
-  padding: 3px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  padding: 4px;
+  background: rgba(255,255,255,0.9);
 }
-.row-body { min-width: 0; }
-.row-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row-body { min-width: 0; align-self: start; }
+.row-meta { display: flex; align-items: center; gap: 6px; min-width: 0; height: 20px; overflow: hidden; }
 .row-sender {
   font-size: 12px;
   font-weight: 650;
@@ -747,29 +868,26 @@ a { color: inherit; text-decoration: none; }
   content: "—";
   color: var(--fg-dim);
 }
-.row-reasons {
-  display: flex; gap: 5px;
-  margin-top: 7px;
-  flex-wrap: wrap;
-}
 .reason-chip {
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 3px 7px;
+  padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(255,176,124,0.14);
-  border: 1px solid rgba(255,176,124,0.26);
-  color: #ffb07c;
-  font-weight: 800;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  color: var(--fg-mute);
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
 }
-.reason-chip.critical { background: rgba(255,77,77,0.14); border-color: rgba(255,77,77,0.3); color: #ff8585; }
-.reason-chip.deadline { background: rgba(255,140,66,0.14); border-color: rgba(255,140,66,0.3); color: #ffb07c; }
-.reason-chip.vip      { background: rgba(255,207,90,0.14); border-color: rgba(255,207,90,0.3); color: #ffd97a; }
+.reason-chip.critical { background: rgba(192,57,43,0.08); border-color: rgba(192,57,43,0.2); color: #b85c52; }
 
 .row-actions {
   position: relative;
+  align-self: center;
   display: flex; gap: 3px;
   padding: 4px 5px;
   border: 1px solid rgba(255,255,255,0.16);
@@ -938,7 +1056,7 @@ a { color: inherit; text-decoration: none; }
 .thread-msg-body { font-size: 13px; line-height: 1.65; color: var(--fg-mute); white-space: pre-wrap; }
 
 .thread-actions {
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
   padding-top: 8px;
 }
 .thread-btn {
@@ -1075,6 +1193,9 @@ a { color: inherit; text-decoration: none; }
 .cal-rsvp-btn.decline { border-color: oklch(0.65 0.2 25 / 0.6); color: oklch(0.75 0.18 25); }
 .cal-rsvp-btn.decline:hover { background: oklch(0.65 0.2 25 / 0.12); }
 .cal-rsvp-btn.decline.active { background: oklch(0.65 0.2 25 / 0.2); border-color: oklch(0.65 0.2 25); }
+.cal-rsvp-btn.maybe { border-color: oklch(0.75 0.14 80 / 0.6); color: oklch(0.8 0.13 80); }
+.cal-rsvp-btn.maybe:hover { background: oklch(0.75 0.14 80 / 0.12); }
+.cal-rsvp-btn.maybe.active { background: oklch(0.75 0.14 80 / 0.2); border-color: oklch(0.75 0.14 80); }
 .cal-rsvp-btn-icon { font-size: 18px; }
 .cal-rsvp-status {
   padding: 10px 14px;
@@ -1562,113 +1683,6 @@ a { color: inherit; text-decoration: none; }
 .cmdk-foot { color: rgba(255,255,255,0.4); }
 .cmdk-kbd { color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); }
 
-/* ====== Focus mode ====== */
-.focus-stage {
-  flex: 1;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
-.focus-head {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--line-soft);
-  display: flex; align-items: center; gap: 12px;
-  backdrop-filter: blur(var(--blur));
-  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-}
-.focus-progress {
-  flex: 1;
-  display: flex; gap: 3px;
-}
-.focus-pip {
-  flex: 1;
-  height: 4px;
-  border-radius: 99px;
-  background: rgba(255,255,255,0.08);
-}
-.focus-pip.done { background: var(--accent); box-shadow: 0 0 8px var(--accent-soft); }
-.focus-pip.current { background: var(--accent-2); box-shadow: 0 0 14px var(--accent); }
-
-.focus-card-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-  overflow-y: auto;
-  width: 100%;
-}
-.focus-card {
-  max-width: 640px;
-  width: 100%;
-  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 22px;
-  display: flex; flex-direction: column; gap: 14px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(var(--blur)) saturate(1.5);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5);
-}
-.focus-from { display: flex; align-items: center; gap: 12px; }
-.focus-avatar {
-  width: 38px; height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07));
-  border: 1px solid var(--border);
-  display: grid; place-items: center;
-  font-size: 13px; font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
-  flex-shrink: 0;
-}
-.focus-from-name { font-size: 13px; font-weight: 700; }
-.focus-from-meta { font-family: var(--font-mono); font-size: 10px; color: var(--fg-dim); margin-top: 2px; }
-.focus-subject { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
-.focus-body {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--fg-mute);
-  white-space: pre-wrap;
-  padding: 14px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-sm);
-  max-height: 240px;
-  overflow-y: auto;
-}
-.focus-foot {
-  padding: 14px 20px;
-  border-top: 1px solid var(--line-soft);
-  display: flex; gap: 6px; align-items: center; justify-content: center;
-  flex-wrap: wrap;
-  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-}
-.focus-foot-btn {
-  padding: 8px 14px;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  display: flex; align-items: center; gap: 6px;
-  color: var(--fg);
-  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
-  transition: background .15s, border-color .15s, transform .15s;
-  font-weight: 650;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-  white-space: nowrap;
-}
-.focus-foot-btn:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.06));
-  border-color: var(--hairline);
-  transform: translateY(-1px);
-}
-.focus-foot-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.focus-foot-btn.primary {
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-  color: #04140d;
-  border-color: rgba(255,255,255,0.5);
-  font-weight: 800;
-  box-shadow: 0 14px 32px rgba(0,200,150,0.28), inset 0 1px 0 rgba(255,255,255,0.65);
-}
-.focus-kbd-hint { font-family: var(--font-mono); font-size: 9px; color: var(--fg-dim); letter-spacing: 0.04em; opacity: 0.7; }
-
 /* ====== Toast ====== */
 .toast-wrap {
   position: fixed;
@@ -1835,18 +1849,19 @@ a { color: inherit; text-decoration: none; }
   border-color: rgba(0,0,0,0.08);
 }
 :root[data-theme="light"] .thread-btn.primary,
-:root[data-theme="light"] .batch-btn.primary,
-:root[data-theme="light"] .focus-foot-btn.primary {
+:root[data-theme="light"] .batch-btn.primary {
   background: linear-gradient(135deg, #2d2d30, #1d1d1f);
   color: #fff;
   border-color: rgba(0,0,0,0.12);
   box-shadow: 0 4px 14px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 :root[data-theme="light"] .thread-btn.primary:hover,
-:root[data-theme="light"] .batch-btn.primary:hover,
-:root[data-theme="light"] .focus-foot-btn.primary:hover {
+:root[data-theme="light"] .batch-btn.primary:hover {
   background: linear-gradient(135deg, #3d3d40, #2d2d30);
 }
+:root[data-theme="light"] .settings-panel { background: rgba(0,0,0,0.02); }
+:root[data-theme="light"] .settings-btn { background: rgba(255,255,255,0.7); }
+:root[data-theme="light"] .toggle { background: rgba(0,0,0,0.14); }
 :root[data-theme="light"] .context-tab.active {
   background: rgba(255,255,255,0.95);
   border-color: rgba(0,0,0,0.08);
@@ -1902,8 +1917,6 @@ a { color: inherit; text-decoration: none; }
   background: rgba(0,0,0,0.05);
   border-color: rgba(0,0,0,0.08);
 }
-:root[data-theme="light"] .focus-pip.done { background: var(--fg); box-shadow: none; }
-:root[data-theme="light"] .focus-pip.current { background: var(--fg); box-shadow: none; }
 :root[data-theme="light"] .reason-chip.critical { background: rgba(255,69,58,0.08); border-color: rgba(255,69,58,0.2); color: #c8302a; }
 :root[data-theme="light"] .reason-chip.deadline { background: rgba(255,149,0,0.08); border-color: rgba(255,149,0,0.2); color: #b56500; }
 :root[data-theme="light"] .reason-chip.vip { background: rgba(204,153,0,0.08); border-color: rgba(204,153,0,0.2); color: #8a6800; }
@@ -1912,6 +1925,173 @@ a { color: inherit; text-decoration: none; }
 :root[data-theme="light"] .followup-due.overdue { color: #c8302a; border-color: rgba(255,69,58,0.25); background: rgba(255,69,58,0.06); }
 :root[data-theme="light"] .task-pri.high { color: #c8302a; border-color: rgba(255,69,58,0.25); background: rgba(255,69,58,0.06); }
 :root[data-theme="light"] .task-pri.medium { color: #b56500; border-color: rgba(255,149,0,0.25); background: rgba(255,149,0,0.06); }
+
+/* Topbar inline limit selector */
+.topbar-limit { display: inline-flex; align-items: center; gap: 6px; }
+.topbar-limit select {
+  font: inherit; font-size: 11px;
+  color: var(--fg-mute);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(255,255,255,0.45)' d='M0 0h10L5 6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 22px 3px 8px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .15s, color .15s;
+}
+.topbar-limit select:hover { color: var(--fg); border-color: var(--hairline); }
+:root[data-theme="light"] .topbar-limit select {
+  color: var(--fg-mute);
+  background-color: rgba(255,255,255,0.7);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,0.4)' d='M0 0h10L5 6z'/></svg>");
+}
+
+/* VIP row inside modal */
+.modal-vip-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+:root[data-theme="light"] .modal-vip-row { border-bottom-color: rgba(0,0,0,0.06); }
+.modal-vip-row:last-child { border-bottom: none; }
+.modal-vip-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.3; }
+:root[data-theme="light"] .modal-vip-name { color: var(--fg); }
+.modal-vip-meta { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.42); margin-top: 2px; }
+:root[data-theme="light"] .modal-vip-meta { color: var(--fg-dim); }
+
+/* Custom Rules modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.52);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  display: grid; place-items: center;
+  z-index: 500; padding: 24px;
+  animation: fadeIn .15s ease-out;
+}
+:root[data-theme="light"] .modal-overlay { background: rgba(0,0,0,0.22); }
+.modal {
+  width: 100%; max-width: 520px;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  background: linear-gradient(145deg, rgba(30,36,44,0.96), rgba(18,22,28,0.98));
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18);
+  backdrop-filter: blur(34px) saturate(1.6);
+  overflow: hidden;
+  animation: cmdkIn .18s ease-out;
+}
+:root[data-theme="light"] .modal {
+  background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(245,245,247,0.98));
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 22px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
+:root[data-theme="light"] .modal-head { border-color: rgba(0,0,0,0.06); }
+.modal-title { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: #fff; }
+:root[data-theme="light"] .modal-title { color: var(--fg); }
+.modal-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 3px; }
+:root[data-theme="light"] .modal-sub { color: var(--fg-dim); }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55); font-size: 14px;
+  display: grid; place-items: center;
+  transition: background .15s, color .15s;
+}
+:root[data-theme="light"] .modal-close { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: var(--fg-mute); }
+.modal-close:hover { background: rgba(255,255,255,0.16); color: #fff; }
+:root[data-theme="light"] .modal-close:hover { background: rgba(0,0,0,0.1); color: var(--fg); }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 22px 22px; display: flex; flex-direction: column; gap: 10px; }
+.rule-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+}
+:root[data-theme="light"] .rule-item { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+.rule-cond { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+:root[data-theme="light"] .rule-cond { color: var(--fg-dim); }
+.rule-val { font-size: 12px; font-weight: 700; color: #fff; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-theme="light"] .rule-val { color: var(--fg); }
+.rule-cat {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 800;
+  padding: 2px 7px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.6); flex-shrink: 0;
+}
+:root[data-theme="light"] .rule-cat { border-color: var(--border); color: var(--fg-mute); }
+.rule-pri { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+:root[data-theme="light"] .rule-pri { color: var(--fg-dim); }
+.rule-del { width: 22px; height: 22px; border-radius: 50%; color: rgba(255,255,255,0.35); font-size: 14px; display: grid; place-items: center; flex-shrink: 0; transition: color .15s, background .15s; }
+:root[data-theme="light"] .rule-del { color: var(--fg-dim); }
+.rule-del:hover { color: #ff8585; background: rgba(255,77,77,0.12); }
+.rule-empty { text-align: center; padding: 32px 0; color: rgba(255,255,255,0.35); font-size: 13px; }
+:root[data-theme="light"] .rule-empty { color: var(--fg-dim); }
+.rule-item.learned { border-left: 2px solid rgba(0,200,150,0.4); }
+.learned-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); flex-shrink: 0; opacity: 0.85; }
+.learned-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-dim); padding: 10px 0 4px; }
+.recat-select { cursor: pointer; font-size: 12px; font-weight: 650; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)); color: var(--fg); flex-shrink: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.12); transition: background .15s, border-color .15s; }
+.recat-select:hover { background: linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0.1)); border-color: var(--hairline); }
+.rule-form {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+}
+:root[data-theme="light"] .rule-form { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+.rule-form-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 700; }
+:root[data-theme="light"] .rule-form-label { color: var(--fg-dim); }
+.rule-form-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rule-select, .rule-input {
+  font: inherit; font-size: 12px; color: #fff;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px;
+  padding: 7px 10px; outline: none; transition: border-color .15s;
+}
+:root[data-theme="light"] .rule-select, :root[data-theme="light"] .rule-input { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.12); color: var(--fg); }
+.rule-select:focus, .rule-input:focus { border-color: rgba(0,200,150,0.5); }
+.rule-input { flex: 1; min-width: 120px; }
+.rule-add-btn {
+  padding: 9px 18px; font-size: 12px; font-weight: 800; align-self: flex-end;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: #04140d;
+  border: none; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,200,150,0.28), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: opacity .15s, transform .15s;
+}
+.rule-add-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.rule-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+:root[data-theme="light"] .rule-add-btn { background: linear-gradient(135deg, #2d2d30, #1d1d1f); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+/* Team Brief pane */
+.team-pane { padding-bottom: 32px; }
+.team-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:20px; }
+.team-setup { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px; margin-bottom: 20px; }
+.team-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:16px; }
+.team-card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px; display:flex; flex-direction:column; gap:14px; }
+.team-card-head { display:flex; align-items:center; gap:10px; }
+.team-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; }
+.team-badge { font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; flex-shrink:0; }
+.team-badge.overloaded { background:rgba(212,92,92,0.15); color:var(--c-escalation); border:1px solid rgba(212,92,92,0.3); }
+.workload-bar-wrap { height:6px; background:var(--s2); border-radius:3px; overflow:hidden; }
+.workload-bar-fill { height:100%; border-radius:3px; transition:width .4s ease; }
+.team-stuck { }
+.team-expand-btn { background:none; border:none; color:var(--accent); cursor:pointer; font-size:10px; margin-left:6px; padding:0; }
+.stuck-task-row { display:flex; align-items:center; gap:6px; padding:5px 0; border-bottom:1px solid var(--line-soft); }
+.stuck-task-row:last-child { border-bottom:none; }
+.stuck-badge { font-size:9px; font-weight:700; padding:2px 6px; border-radius:999px; flex-shrink:0; text-transform:uppercase; letter-spacing:0.04em; }
+.stuck-badge.overdue { background:rgba(212,92,92,0.15); color:var(--c-escalation); }
+.stuck-badge.stale { background:rgba(196,154,64,0.15); color:var(--c-action); }
+.stuck-name { font-size:12px; color:var(--fg-mute); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; }
+.team-suggestion { background:var(--accent-bg); border-radius:8px; padding:10px 12px; }
+.team-draft-ta { width:100%; box-sizing:border-box; font:inherit; font-size:12px; line-height:1.5; color:var(--fg); background:var(--s1); border:1px solid var(--border); border-radius:8px; padding:10px 12px; outline:none; resize:vertical; transition:border-color .15s; }
+.team-draft-ta:focus { border-color:rgba(0,200,150,0.5); }
+:root[data-theme="light"] .team-draft-ta { background:rgba(255,255,255,0.7); border-color:rgba(0,0,0,0.12); color:var(--fg); }
 </style>
 </head>
 <body>
@@ -2493,10 +2673,12 @@ Object.assign(window, {
 </script>
 <script type="text/babel" data-presets="react">/* Left rail — brand + workspace nav */
 
-const Rail = ({ view, setView, totals, user, logoUrl }) => {
+const Rail = ({ view, setView, totals, user, logoUrl, settings, onSettingsChange, onClearHistory, onOpenRules, onOpenVips, vips }) => {
   const name = (user && user.name) || "You";
   const email = (user && user.email) || "—";
   const initials = name.split(/\s+/).filter(Boolean).map(p => p[0]).join("").slice(0, 2).toUpperCase() || "·";
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+
   return (
     <aside className="rail">
       <div className="rail-head">
@@ -2506,8 +2688,8 @@ const Rail = ({ view, setView, totals, user, logoUrl }) => {
             : "T"}
         </div>
         <div className="brand-text">
-          <span className="brand-name">Triage</span>
-          <span className="brand-sub">v0.4 · prototype</span>
+          <span className="brand-name">QuestFlow</span>
+          <span className="brand-sub">AI Inbox Assistant</span>
         </div>
       </div>
 
@@ -2516,6 +2698,7 @@ const Rail = ({ view, setView, totals, user, logoUrl }) => {
         {[
           ["inbox", "Inbox", totals.inbox],
           ["tasks", "Tasks", totals.tasks],
+          ["team", "Team Brief", totals.team],
           ["vips", "VIPs & follow-ups", totals.vipFollow],
           ["resolved", "Resolved", totals.resolved],
           ["trashed", "Trashed", totals.trashed],
@@ -2532,11 +2715,36 @@ const Rail = ({ view, setView, totals, user, logoUrl }) => {
         ))}
       </div>
 
-      <div className="rail-foot">
-        <div className="user-avatar">{initials}</div>
-        <div style={{display:"flex",flexDirection:"column",lineHeight:1.2,minWidth:0,flex:1}}>
-          <span style={{fontSize:12,fontWeight:600,color:"var(--fg)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{name}</span>
-          <span style={{fontSize:10,color:"var(--fg-dim)",fontFamily:"var(--font-mono)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{email}</span>
+      <div style={{marginTop:"auto"}}>
+        {settingsOpen && (
+          <div className="settings-panel">
+            <div className="settings-label">Settings</div>
+
+            <div className="settings-row">
+              <div className="settings-row-text">
+                <div className="settings-row-title">VIP Senders</div>
+                <div className="settings-row-sub">{(vips||[]).length} sender{(vips||[]).length !== 1 ? "s" : ""} · priority routing</div>
+              </div>
+              <button className="settings-btn" onClick={onOpenVips}>Manage</button>
+            </div>
+
+            <div className="settings-row">
+              <div className="settings-row-text">
+                <div className="settings-row-title">Custom Rules</div>
+                <div className="settings-row-sub">Override AI classification</div>
+              </div>
+              <button className="settings-btn" onClick={onOpenRules}>Manage</button>
+            </div>
+          </div>
+        )}
+
+        <div className="rail-foot" onClick={() => setSettingsOpen(o => !o)}>
+          <div className="user-avatar">{initials}</div>
+          <div style={{display:"flex",flexDirection:"column",lineHeight:1.2,minWidth:0,flex:1}}>
+            <span style={{fontSize:12,fontWeight:600,color:"var(--fg)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{name}</span>
+            <span style={{fontSize:10,color:"var(--fg-dim)",fontFamily:"var(--font-mono)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{email}</span>
+          </div>
+          <span style={{fontSize:10,color:"var(--fg-dim)",transition:"transform .2s",display:"inline-block",transform:settingsOpen?"rotate(180deg)":"rotate(0deg)"}}>▲</span>
         </div>
       </div>
     </aside>
@@ -2544,6 +2752,213 @@ const Rail = ({ view, setView, totals, user, logoUrl }) => {
 };
 
 window.Rail = Rail;
+
+const TeamPane = ({ brief, loading, onRefresh, settings, onSaveSettings, onDraftEmail }) => {
+  const [keyDraft, setKeyDraft] = React.useState(settings.apiKey || "");
+  const [listDraft, setListDraft] = React.useState(settings.listId || "");
+  const [showSetup, setShowSetup] = React.useState(!settings.apiKey || !settings.listId);
+  const [saving, setSaving] = React.useState(false);
+  const [draftEdits, setDraftEdits] = React.useState({});
+  const [expandedCards, setExpandedCards] = React.useState(new Set());
+
+  React.useEffect(() => {
+    setKeyDraft(settings.apiKey || "");
+    setListDraft(settings.listId || "");
+    if (!settings.apiKey || !settings.listId) setShowSetup(true);
+  }, [settings.apiKey, settings.listId]);
+
+  const handleSave = async () => {
+    if (!keyDraft.trim() || !listDraft.trim()) return;
+    setSaving(true);
+    try {
+      await onSaveSettings(keyDraft.trim(), listDraft.trim());
+      setShowSetup(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleExpand = (i) => setExpandedCards(prev => {
+    const next = new Set(prev);
+    next.has(i) ? next.delete(i) : next.add(i);
+    return next;
+  });
+
+  const members = brief?.members || [];
+  const configured = !!(settings.apiKey && settings.listId);
+
+  return (
+    <div className="team-pane" style={{maxWidth:820, margin:"0 auto"}}>
+      <div className="team-header">
+        <div>
+          <div style={{fontSize:13, fontWeight:700, color:"var(--fg)"}}>Team Brief</div>
+          <div style={{fontSize:11, color:"var(--fg-dim)", marginTop:3}}>
+            {loading ? "Fetching ClickUp tasks…"
+              : brief ? (brief.allClear ? "All clear — no stuck or overdue tasks" : `${members.length} member${members.length !== 1 ? "s" : ""} with stuck or overdue tasks`)
+              : "Powered by ClickUp + Claude"}
+          </div>
+        </div>
+        <div style={{display:"flex", gap:8, alignItems:"center"}}>
+          <button className="thread-btn" style={{fontSize:11}} onClick={() => setShowSetup(s => !s)}>⚙ Settings</button>
+          {configured && (
+            <button className="rule-add-btn" style={{fontSize:11}} onClick={onRefresh} disabled={loading}>
+              {loading ? "Loading…" : "↻ Refresh"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showSetup && (
+        <div className="team-setup">
+          <div style={{fontSize:12, fontWeight:700, color:"var(--fg)", marginBottom:8}}>ClickUp Connection</div>
+          <div style={{fontSize:11, color:"var(--fg-dim)", marginBottom:14, lineHeight:1.6}}>
+            Get your API key at <strong>ClickUp → Settings → Apps → API Token</strong>.<br/>
+            Find your List ID in the list URL: app.clickup.com/…/li/<strong>listId</strong>
+          </div>
+          <div className="rule-form-row">
+            <input
+              className="rule-input" style={{flex:2}}
+              type="password"
+              placeholder="API key (pk_...)"
+              value={keyDraft}
+              onChange={e => setKeyDraft(e.target.value)}
+            />
+            <input
+              className="rule-input" style={{flex:1}}
+              placeholder="List ID"
+              value={listDraft}
+              onChange={e => setListDraft(e.target.value)}
+            />
+            <button
+              className="rule-add-btn"
+              onClick={handleSave}
+              disabled={saving || !keyDraft.trim() || !listDraft.trim()}
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!loading && !brief && configured && (
+        <div className="list-empty" style={{padding:"60px 20px"}}>
+          <div className="list-empty-icon">👥</div>
+          <div className="list-empty-title">Ready to analyze your team</div>
+          <div className="list-empty-sub">Click Refresh to fetch stuck and overdue tasks from ClickUp</div>
+          <button className="rule-add-btn" onClick={onRefresh} style={{marginTop:18}}>↻ Load Team Brief</button>
+        </div>
+      )}
+
+      {!configured && !showSetup && (
+        <div className="list-empty" style={{padding:"60px 20px"}}>
+          <div className="list-empty-icon">🔗</div>
+          <div className="list-empty-title">Connect ClickUp to get started</div>
+          <div className="list-empty-sub">Add your API key and List ID in settings above</div>
+          <button className="thread-btn" style={{marginTop:18}} onClick={() => setShowSetup(true)}>Open Settings</button>
+        </div>
+      )}
+
+      {loading && (
+        <div className="list-empty" style={{padding:"60px 20px"}}>
+          <div className="list-empty-icon" style={{display:"inline-block", animation:"spin 1.5s linear infinite"}}>⟳</div>
+          <div className="list-empty-title">Analyzing team workload…</div>
+          <div className="list-empty-sub">Fetching ClickUp tasks · generating check-ins with Claude</div>
+        </div>
+      )}
+
+      {!loading && brief?.allClear && (
+        <div className="list-empty" style={{padding:"60px 20px"}}>
+          <div className="list-empty-icon">✅</div>
+          <div className="list-empty-title">All clear!</div>
+          <div className="list-empty-sub">No stuck or overdue tasks found in this list</div>
+        </div>
+      )}
+
+      {!loading && members.length > 0 && (
+        <div className="team-grid">
+          {members.map((member, i) => {
+            const draftText = draftEdits.hasOwnProperty(i) ? draftEdits[i] : member.checkInDraft;
+            const expanded = expandedCards.has(i);
+            const score = member.workloadScore;
+            const scoreColor = score >= 4 ? "var(--c-escalation)" : score >= 3 ? "var(--c-action)" : "var(--accent)";
+
+            return (
+              <div key={i} className="team-card">
+                <div className="team-card-head">
+                  <div className="team-avatar">{(member.name[0] || "?").toUpperCase()}</div>
+                  <div style={{flex:1, minWidth:0}}>
+                    <div style={{fontSize:13, fontWeight:700, color:"var(--fg)", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{member.name}</div>
+                    <div style={{fontSize:11, color:"var(--fg-dim)", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{member.email || "—"}</div>
+                  </div>
+                  {member.overloaded && <span className="team-badge overloaded">⚠ Overloaded</span>}
+                </div>
+
+                <div>
+                  <div style={{display:"flex", justifyContent:"space-between", marginBottom:5}}>
+                    <span style={{fontSize:11, color:"var(--fg-dim)"}}>Workload · {member.totalOpen} open task{member.totalOpen !== 1 ? "s" : ""}</span>
+                    <span style={{fontSize:11, fontWeight:700, color:scoreColor}}>{score}/5</span>
+                  </div>
+                  <div className="workload-bar-wrap">
+                    <div className="workload-bar-fill" style={{width:`${(score/5)*100}%`, background:scoreColor}} />
+                  </div>
+                </div>
+
+                {member.stuckTasks.length > 0 && (
+                  <div className="team-stuck">
+                    <div style={{fontSize:10, textTransform:"uppercase", letterSpacing:"0.06em", color:"var(--fg-dim)"}}>
+                      {member.stuckTasks.length} stuck / overdue
+                      <button className="team-expand-btn" onClick={() => toggleExpand(i)}>
+                        {expanded ? "▲ hide" : "▼ show"}
+                      </button>
+                    </div>
+                    {expanded && (
+                      <div style={{marginTop:6}}>
+                        {member.stuckTasks.map((t, j) => (
+                          <div key={j} className="stuck-task-row">
+                            <span className={`stuck-badge ${t.isOverdue ? "overdue" : "stale"}`}>{t.isOverdue ? "overdue" : "stale"}</span>
+                            <span className="stuck-name">{t.name.length > 55 ? t.name.slice(0, 55) + "…" : t.name}</span>
+                            {t.dueDate && <span style={{fontSize:10, color:"var(--fg-dim)", flexShrink:0}}>{t.dueDate}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {member.suggestion && (
+                  <div className="team-suggestion">
+                    <div style={{fontSize:10, textTransform:"uppercase", letterSpacing:"0.06em", color:"var(--accent)", marginBottom:4}}>Suggestion</div>
+                    <div style={{fontSize:12, color:"var(--fg-mute)", lineHeight:1.5}}>{member.suggestion}</div>
+                  </div>
+                )}
+
+                <div>
+                  <div style={{fontSize:10, textTransform:"uppercase", letterSpacing:"0.06em", color:"var(--fg-dim)", marginBottom:6}}>Check-in draft</div>
+                  <textarea
+                    className="team-draft-ta"
+                    value={draftText}
+                    onChange={e => setDraftEdits(prev => ({ ...prev, [i]: e.target.value }))}
+                    rows={4}
+                  />
+                  {member.email && (
+                    <button
+                      className="rule-add-btn"
+                      style={{marginTop:8, fontSize:11}}
+                      onClick={() => onDraftEmail(member.email, member.name, `Check-in: ${member.name}`, draftText)}
+                    >
+                      ✉ Create Gmail draft
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+window.TeamPane = TeamPane;
 </script>
 <script type="text/babel" data-presets="react">/* Email list — stats, attention banner, tabs, rows, batch bar */
 
@@ -2551,24 +2966,24 @@ const CAT_LABEL = {
   escalation: "Escalation",
   action_required: "Action",
   calendar: "Calendar",
-  fyi: "FYI",
-  low_priority: "Low",
+  awaiting: "Awaiting",
+  digest: "Digest",
 };
 const CAT_VAR = {
   escalation: "var(--c-escalation)",
   action_required: "var(--c-action)",
   calendar: "var(--c-calendar)",
-  fyi: "var(--c-fyi)",
-  low_priority: "var(--c-low)",
+  awaiting: "var(--c-fyi)",
+  digest: "var(--c-low)",
 };
-const CAT_ORDER = ["escalation","action_required","calendar","fyi","low_priority"];
+const CAT_ORDER = ["escalation","action_required","calendar","awaiting","digest"];
 
 const CATS = [
   {k:"escalation", lbl:"Escalation"},
   {k:"action_required", lbl:"Action"},
   {k:"calendar", lbl:"Calendar"},
-  {k:"fyi", lbl:"FYI"},
-  {k:"low_priority", lbl:"Low"},
+  {k:"awaiting", lbl:"Awaiting"},
+  {k:"digest", lbl:"Digest"},
 ];
 
 window.CAT_LABEL = CAT_LABEL;
@@ -2605,13 +3020,23 @@ const Stats = ({ emails, activeCat, setActiveCat }) => {
   );
 };
 
-const AttentionBanner = ({ emails, style, onClick }) => {
+const AttentionBanner = ({ emails, style, loading }) => {
   const items = emails.filter(e =>
     e.category === "escalation" ||
     e.category === "action_required" ||
     e.vip ||
     (e.category === "calendar" && e.reasons && e.reasons.some(r => /deadline/i.test(r)))
-  );  if (!items.length) return null;
+  );
+  if (loading) return (
+    <div className="attention-banner" style={{opacity:0.45, pointerEvents:"none", minHeight:54}}>
+      <div className="attention-pulse" style={{opacity:0.3}} />
+      <div className="attention-text">
+        <div className="attention-title" style={{background:"var(--border)",borderRadius:4,width:180,height:14,color:"transparent"}}>‌</div>
+        <div className="attention-sub" style={{background:"var(--border)",borderRadius:4,width:240,height:10,marginTop:6,color:"transparent"}}>‌</div>
+      </div>
+    </div>
+  );
+  if (!items.length) return null;
   const reasons = items.reduce((a,e) => {
     (e.reasons||[]).forEach(r => a[r] = (a[r]||0)+1);
     return a;
@@ -2634,13 +3059,12 @@ const AttentionBanner = ({ emails, style, onClick }) => {
   if (style === "hidden") return null;
 
   return (
-    <div className="attention-banner" onClick={onClick}>
+    <div className="attention-banner">
       <div className="attention-pulse" />
       <div className="attention-text">
         <div className="attention-title">{items.length} need your attention today</div>
         <div className="attention-sub">{topReasons || "Critical, asks, deadlines, VIPs"}</div>
       </div>
-      <div className="attention-go">Focus mode ⌥F</div>
     </div>
   );
 };
@@ -2667,18 +3091,20 @@ const Tabs = ({ emails, activeTab, setActiveTab }) => {
   );
 };
 
-const Row = ({ email, selected, checked, onSelect, onCheck, onAction, dismissing, batchMode }) => {
+const Row = ({ email, selected, checked, onSelect, onCheck, onAction, onRestore, dismissing, batchMode, restoreMode }) => {
   return (
     <div
       className={`row ${email.unread ? "unread" : ""} ${selected ? "selected" : ""} ${dismissing ? "dismissing" : ""}`}
       style={{"--c": CAT_VAR[email.category]}}
       onClick={(e) => {
+        if (restoreMode) return;
         if (e.shiftKey || batchMode) { onCheck(email.id, !checked, e.shiftKey); return; }
         onSelect(email.id);
       }}
     >
       <button
         className={`row-check ${checked ? "checked" : ""}`}
+        style={restoreMode ? {visibility:"hidden", pointerEvents:"none"} : {}}
         onClick={(e) => { e.stopPropagation(); onCheck(email.id, !checked, e.shiftKey); }}
         aria-label="Select"
       >
@@ -2686,39 +3112,41 @@ const Row = ({ email, selected, checked, onSelect, onCheck, onAction, dismissing
       </button>
 
       <div className={`row-avatar ${email.vip ? "vip" : ""}`}>
-        {email.photo ? (
+        {email.avatar}
+        {email.photo && (
           <img
             className="avatar-img"
             src={email.photo}
             alt=""
             onError={(e) => { e.currentTarget.style.display = "none"; }}
           />
-        ) : email.avatar}
+        )}
       </div>
 
       <div className="row-body">
         <div className="row-meta">
           <span className="row-cat-dot" />
           <span className="row-sender">{email.sender}</span>
+          {email.reasons && email.reasons.length > 0 && email.reasons.map(r => (
+            <span key={r} className={`reason-chip ${reasonClass(r)}`}>{r}</span>
+          ))}
           <span className="row-time">{email.time}</span>
         </div>
         <div className="row-subject-line">
           <span className="row-subject">{email.subject}</span>
         </div>
         <div className="row-preview">{email.preview}</div>
-        {email.reasons && email.reasons.length > 0 && (
-          <div className="row-reasons">
-            {email.reasons.map(r => (
-              <span key={r} className={`reason-chip ${reasonClass(r)}`}>{r}</span>
-            ))}
-          </div>
-        )}
+        {email.reason && <div className="row-reason">↳ {email.reason}</div>}
       </div>
 
-      <div className="row-actions" onClick={(e) => e.stopPropagation()}>
-        <button className="row-action resolve" title="Resolve (r)" onClick={() => onAction(email.id, "resolve")}>✓</button>
-        <button className="row-action snooze" title="Snooze" onClick={() => onAction(email.id, "snooze")}>☾</button>
-        <button className="row-action trash" title="Trash (t)" onClick={() => onAction(email.id, "trash")}>🗑</button>
+      <div className="row-actions" style={restoreMode ? {opacity:1} : {}} onClick={(e) => e.stopPropagation()}>
+        {restoreMode
+          ? <button className="row-action" style={{width:"auto",padding:"0 10px",fontSize:10,letterSpacing:"0.04em",whiteSpace:"nowrap"}} title="Return to inbox" onClick={() => onRestore(email.id)}>↩ inbox</button>
+          : <>
+              <button className="row-action resolve" title="Resolve (r)" onClick={() => onAction(email.id, "resolve")}>✓</button>
+              <button className="row-action trash" title="Trash (t)" onClick={() => onAction(email.id, "trash")}>🗑</button>
+            </>
+        }
       </div>
     </div>
   );
@@ -2734,9 +3162,8 @@ window.EmailRow = Row;
 const ContextPane = ({
   contextTab, setContextTab,
   selectedEmail,
-  onResolve, onTrash, onSnooze,
+  onResolve, onTrash, onRecategorize, onCreateCalEvent, onAddTask,
   tasks, toggleTask,
-  vips, followups, onAddVip, onRemoveVip,
   draftState, onOpenDraft, onSendDraft, onUpdateDraft, onChangeTone, onChatRefine,
 }) => {
   return (
@@ -2746,7 +3173,6 @@ const ContextPane = ({
           ["thread", "Thread"],
           ["draft", "Draft"],
           ["tasks", "Tasks", tasks.filter(t => !t.done).length],
-          ["tracker", "VIPs", null],
         ].map(([k, label, count]) => (
           <button
             key={k}
@@ -2760,10 +3186,9 @@ const ContextPane = ({
       </div>
 
       <div className="context-body">
-        {contextTab === "thread" && <ThreadView email={selectedEmail} onResolve={onResolve} onTrash={onTrash} onSnooze={onSnooze} onOpenDraft={onOpenDraft} />}
+        {contextTab === "thread" && <ThreadView email={selectedEmail} onResolve={onResolve} onTrash={onTrash} onOpenDraft={onOpenDraft} onRecategorize={onRecategorize} onCreateCalEvent={onCreateCalEvent} onAddTask={onAddTask} />}
         {contextTab === "draft" && <DraftPane email={selectedEmail} draft={draftState} chat={draftState.chat} onChange={onUpdateDraft} onSend={onSendDraft} onTone={onChangeTone} onChatSend={onChatRefine} />}
         {contextTab === "tasks" && <TasksPane tasks={tasks} toggleTask={toggleTask} />}
-        {contextTab === "tracker" && <TrackerPane vips={vips} followups={followups} onAddVip={onAddVip} onRemoveVip={onRemoveVip} />}
       </div>
     </aside>
   );
@@ -2771,153 +3196,21 @@ const ContextPane = ({
 
 const initialsOf = (s) => (s || "").split(/[\s@.]+/).filter(Boolean).map(p => p[0]).join("").slice(0,2).toUpperCase() || "·";
 
-const CalendarCard = ({ email, onResolve, onTrash }) => {
-  const [event, setEvent] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [rsvp, setRsvp] = React.useState(null);
-  const [sending, setSending] = React.useState(false);
-  const [sent, setSent] = React.useState(false);
-  const [rsvpError, setRsvpError] = React.useState(null);
-  const [needsAuth, setNeedsAuth] = React.useState(false);
+const ThreadView = ({ email, onResolve, onTrash, onOpenDraft, onRecategorize, onCreateCalEvent, onAddTask }) => {
+  const [calLoading, setCalLoading] = React.useState(false);
+  const [taskLoading, setTaskLoading] = React.useState(false);
 
-  React.useEffect(() => {
-    setLoading(true);
-    setEvent(null);
-    setRsvp(null);
-    setSent(false);
-    setRsvpError(null);
-    setNeedsAuth(false);
-    if (!IS_APPS_SCRIPT) { setLoading(false); return; }
-    gsRun("getCalendarEventDetails", email.id)
-      .then(d => { setEvent(d); setLoading(false); })
-      .catch(() => setLoading(false));
-    gsRun("checkCalendarAuth")
-      .then(r => { if (r && !r.authorized) setNeedsAuth(true); })
-      .catch(() => {});
-  }, [email.id]);
-
-  const handleRsvp = (response) => {
-    setRsvp(response);
-    setSending(true);
-    setRsvpError(null);
-    if (!IS_APPS_SCRIPT) { setTimeout(() => { setSending(false); setSent(true); }, 800); return; }
-    gsRun("rsvpCalendarEvent", email.id, response)
-      .then(() => { setSending(false); setSent(true); })
-      .catch(err => {
-        setSending(false);
-        setRsvp(null);
-        const msg = err && err.message ? err.message : '';
-        if (msg === 'NEEDS_AUTH' || msg.indexOf('NEEDS_AUTH') !== -1) {
-          setNeedsAuth(true);
-          setRsvpError(null);
-        } else if (msg === 'EVENT_NOT_FOUND' || msg.indexOf('EVENT_NOT_FOUND') !== -1) {
-          setRsvpError('Event not found in your calendar. Open the invite in Gmail first to add it.');
-        } else {
-          setRsvpError(msg || 'Failed to update RSVP');
-        }
-      });
+  const handleCalEvent = () => {
+    if (!email || calLoading) return;
+    setCalLoading(true);
+    onCreateCalEvent(email).finally(() => setCalLoading(false));
   };
 
-  const rsvpLabel = { yes: "Accepted", no: "Declined" };
-
-  return (
-    <div className="thread" style={{overflowY:"auto"}}>
-      <div className="thread-head">
-        <div className="thread-subject">{email.subject}</div>
-        <div className="thread-meta">
-          <span className="thread-meta-pill" style={{"--c": CAT_VAR[email.category]}}>Calendar</span>
-          {(email.reasons||[]).map(r => (
-            <span key={r} className="thread-meta-pill" style={{"--c": "var(--fg-mute)"}}>{r}</span>
-          ))}
-        </div>
-      </div>
-
-      <div className="cal-card">
-        {loading && (
-          <div style={{textAlign:"center",padding:"20px 0",color:"var(--fg-dim)",fontSize:13}}>Loading event details…</div>
-        )}
-
-        {!loading && (
-          <>
-            <div className="cal-card-header">
-              <div className="cal-card-icon">📅</div>
-              <div>
-                <div className="cal-card-title">{event ? event.title : email.subject}</div>
-                {event && event.organizer && (
-                  <div className="cal-card-organizer">Organized by {event.organizer}</div>
-                )}
-              </div>
-            </div>
-
-            {event && (
-              <div className="cal-card-meta">
-                {event.date && (
-                  <div className="cal-card-row">
-                    <span className="cal-card-row-icon">📆</span>
-                    <span>{event.date}{event.time ? " · " + event.time : ""}</span>
-                  </div>
-                )}
-                {(event.location || event.meetLink) && (
-                  <div className="cal-card-row">
-                    <span className="cal-card-row-icon">📍</span>
-                    <span style={{flex:1}}>
-                      {event.location && <span>{event.location}</span>}
-                      {event.meetLink && (
-                        <>{event.location && <br/>}<a className="cal-meet-link" href={event.meetLink} target="_blank" rel="noopener noreferrer">🎥 Join Google Meet</a></>
-                      )}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="cal-rsvp-section">
-              <div className="cal-rsvp-label">RSVP</div>
-              {needsAuth ? (
-                <div style={{fontSize:12,lineHeight:1.5,padding:"10px 12px",borderRadius:8,background:"rgba(255,140,66,0.1)",border:"1px solid rgba(255,140,66,0.3)",color:"oklch(0.82 0.14 55)"}}>
-                  Calendar access not yet granted. To fix:<br/>
-                  1. Open <strong>script.google.com</strong> → your project<br/>
-                  2. Run <code style={{fontFamily:"var(--font-mono)",fontSize:11}}>getCurrentUser</code><br/>
-                  3. Accept the <strong>Google Calendar</strong> permission<br/>
-                  4. Reload this app
-                </div>
-              ) : sent ? (
-                <div className="cal-rsvp-status sent">
-                  {rsvpLabel[rsvp] || "Response sent"} — email archived
-                </div>
-              ) : (
-                <>
-                  <div className="cal-rsvp-btns">
-                    <button
-                      className={`cal-rsvp-btn accept${rsvp === "yes" ? " active" : ""}`}
-                      disabled={sending}
-                      onClick={() => handleRsvp("yes")}
-                    >
-                      ✓ Accept
-                    </button>
-                    <button
-                      className={`cal-rsvp-btn decline${rsvp === "no" ? " active" : ""}`}
-                      disabled={sending}
-                      onClick={() => handleRsvp("no")}
-                    >
-                      ✕ Decline
-                    </button>
-                  </div>
-                  {rsvpError && (
-                    <div style={{fontSize:12,color:"oklch(0.75 0.18 25)",marginTop:4}}>{rsvpError}</div>
-                  )}
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-    </div>
-  );
-};
-
-const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
+  const handleAddTask = () => {
+    if (!email || taskLoading) return;
+    setTaskLoading(true);
+    onAddTask(email).finally(() => setTaskLoading(false));
+  };
   if (!email) return (
     <div className="empty-context">
       <div>
@@ -2927,10 +3220,6 @@ const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
       </div>
     </div>
   );
-
-  if (email.category === "calendar") {
-    return <CalendarCard email={email} onResolve={onResolve} onTrash={onTrash} />;
-  }
 
   const thread = email.thread || [{ from: email.sender, text: email.preview, time: email.time }];
 
@@ -2960,10 +3249,35 @@ const ThreadView = ({ email, onResolve, onTrash, onSnooze, onOpenDraft }) => {
       ))}
 
       <div className="thread-actions">
-        <button className="thread-btn primary" onClick={() => onOpenDraft(email)}>✏️ Draft reply</button>
-        <button className="thread-btn" onClick={() => onResolve(email.id)}>✓ Resolve</button>
-        <button className="thread-btn" onClick={() => onSnooze(email.id)}>☾ Snooze</button>
-        <button className="thread-btn" onClick={() => onTrash(email.id)}>🗑 Trash</button>
+        <button className="thread-btn" onClick={() => onOpenDraft(email)}>✏️ Draft reply</button>
+        {onAddTask && (
+          <button className="thread-btn" onClick={handleAddTask} disabled={taskLoading} title="Extract action items and add to Tasks">
+            {taskLoading
+              ? <svg width="11" height="11" viewBox="-1 -1 16 16" fill="none" stroke="currentColor" strokeWidth="2" overflow="visible" style={{animation:"spin 1s linear infinite",transformOrigin:"center"}}><path d="M12 4a5 5 0 11-1.5-3.5M12 1v3h-3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              : "✓"
+            }
+            {taskLoading ? " Adding…" : " + Task"}
+          </button>
+        )}
+        {onCreateCalEvent && (
+          <button className="thread-btn" onClick={handleCalEvent} disabled={calLoading} title="Extract meeting details and add to Google Calendar">
+            {calLoading
+              ? <svg width="11" height="11" viewBox="-1 -1 16 16" fill="none" stroke="currentColor" strokeWidth="2" overflow="visible" style={{animation:"spin 1s linear infinite",transformOrigin:"center"}}><path d="M12 4a5 5 0 11-1.5-3.5M12 1v3h-3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              : "📅"
+            }
+            {calLoading ? " Adding…" : " Add to Calendar"}
+          </button>
+        )}
+        {onRecategorize && (
+          <select
+            className="recat-select"
+            value={email.category}
+            onChange={e => e.target.value !== email.category && onRecategorize(email, e.target.value)}
+            title="Move to category · teaches the system"
+          >
+            {CAT_ORDER.map(c => <option key={c} value={c}>{CAT_LABEL[c]}</option>)}
+          </select>
+        )}
       </div>
     </div>
   );
@@ -3102,7 +3416,7 @@ const TasksPane = ({ tasks, toggleTask }) => {
           <div className="tracker-title">Active · {active.length}</div>
           <span style={{fontFamily:"var(--font-mono)",fontSize:10,color:"var(--fg-dim)"}}>Auto-extracted by Claude</span>
         </div>
-        <div className="tasks-list" style={{padding:0}}>
+        <div style={{display:"flex",flexDirection:"column",gap:0,padding:0}}>
           {active.map(t => (
             <div key={t.id} className={`task ${t.done ? "done" : ""}`}>
               <button className={`task-check ${t.done ? "done" : ""}`} onClick={() => toggleTask(t.id)}>
@@ -3127,7 +3441,7 @@ const TasksPane = ({ tasks, toggleTask }) => {
             <div className="tracker-title">Done · {done.length}</div>
             <button className="tracker-add">Clear</button>
           </div>
-          <div className="tasks-list" style={{padding:0}}>
+          <div style={{display:"flex",flexDirection:"column",gap:0,padding:0}}>
             {done.map(t => (
               <div key={t.id} className={`task done`}>
                 <button className={`task-check done`} onClick={() => toggleTask(t.id)}>
@@ -3148,9 +3462,18 @@ const TasksPane = ({ tasks, toggleTask }) => {
   );
 };
 
-const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
+const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip, onAddFollowup, onRemoveFollowup }) => {
   const [adding, setAdding] = React.useState(false);
   const [val, setVal] = React.useState("");
+  const [trackingForm, setTrackingForm] = React.useState(false);
+  const [trackTo, setTrackTo] = React.useState("");
+  const [trackSubject, setTrackSubject] = React.useState("");
+  const [trackHours, setTrackHours] = React.useState("48");
+  const submitTrack = () => {
+    if (!trackTo.trim()) return;
+    onAddFollowup({ to: trackTo.trim(), subject: trackSubject.trim() || "(no subject)", hours: Number(trackHours) || 48 });
+    setTrackTo(""); setTrackSubject(""); setTrackHours("48"); setTrackingForm(false);
+  };
   const submit = () => {
     const v = val.trim();
     if (!v) return;
@@ -3187,7 +3510,6 @@ const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
               <div className="vip-meta">{v.role} · {v.email}</div>
             </div>
             <div className="vip-actions" style={{display:"flex",gap:6,alignItems:"center"}}>
-              <span className="followup-due">{v.last}</span>
               <button
                 className="tracker-add"
                 title="Remove VIP"
@@ -3202,8 +3524,27 @@ const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
       <div className="tracker-section">
         <div className="tracker-head">
           <div className="tracker-title">Pending follow-ups · {followups.length}</div>
-          <button className="tracker-add">+ Track</button>
+          {!trackingForm && <button className="tracker-add" onClick={() => setTrackingForm(true)}>+ Track</button>}
         </div>
+        {trackingForm && (
+          <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10}}>
+            <input autoFocus value={trackTo} onChange={e => setTrackTo(e.target.value)} placeholder="Recipient email or name"
+              style={{background:"var(--bg-elev)",border:"1px solid var(--border)",borderRadius:999,padding:"8px 14px",fontSize:12,color:"var(--fg)",outline:"none"}} />
+            <input value={trackSubject} onChange={e => setTrackSubject(e.target.value)} placeholder="Subject (optional)"
+              style={{background:"var(--bg-elev)",border:"1px solid var(--border)",borderRadius:999,padding:"8px 14px",fontSize:12,color:"var(--fg)",outline:"none"}} />
+            <select value={trackHours} onChange={e => setTrackHours(e.target.value)}
+              style={{background:"var(--bg-elev)",border:"1px solid var(--border)",borderRadius:999,padding:"8px 14px",fontSize:12,color:"var(--fg)",outline:"none"}}>
+              <option value="24">Follow up in 24h</option>
+              <option value="48">Follow up in 48h</option>
+              <option value="72">Follow up in 3 days</option>
+              <option value="168">Follow up in 1 week</option>
+            </select>
+            <div style={{display:"flex",gap:6}}>
+              <button className="tracker-add" onClick={submitTrack} style={{background:"var(--accent)",color:"#04140d",fontWeight:800,borderColor:"transparent"}}>Save</button>
+              <button className="tracker-add" onClick={() => setTrackingForm(false)}>×</button>
+            </div>
+          </div>
+        )}
         {followups.map(f => (
           <div key={f.id} className="followup-row">
             <div className="vip-avatar" style={{background:"var(--bg-elev-2)"}}>↗</div>
@@ -3211,8 +3552,9 @@ const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
               <div className="followup-to">{f.to}</div>
               <div className="followup-meta">{f.subject} · sent {f.sent}</div>
             </div>
-            <div className="followup-actions">
+            <div className="followup-actions" style={{display:"flex",gap:6,alignItems:"center"}}>
               <span className={`followup-due ${f.overdue ? "overdue" : ""}`}>{f.due}</span>
+              <button className="tracker-add" style={{padding:"3px 8px",fontSize:11}} onClick={() => onRemoveFollowup(f.id)}>×</button>
             </div>
           </div>
         ))}
@@ -3230,11 +3572,163 @@ const TrackerPane = ({ vips, followups, onAddVip, onRemoveVip }) => {
   );
 };
 
+const COND_LABELS = {
+  sender_domain:    "Sender domain is",
+  sender_email:     "Sender email is",
+  sender_contains:  "Sender contains",
+  subject_contains: "Subject contains",
+};
+
+const CustomRulesModal = ({ rules, onClose, onAdd, onDelete, learnedRules, onDeleteLearned }) => {
+  const [form, setForm] = React.useState({ condition: "sender_domain", value: "", category: "digest", priority: 3 });
+  const [error, setError] = React.useState("");
+
+  const submit = () => {
+    if (!form.value.trim()) { setError("Value is required."); return; }
+    setError("");
+    onAdd({ condition: form.condition, value: form.value.trim(), category: form.category, priority: form.priority });
+    setForm(f => ({ ...f, value: "" }));
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <div className="modal-title">Custom Rules</div>
+            <div className="modal-sub">First matching rule overrides AI classification</div>
+          </div>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {rules.length === 0 && (!learnedRules || learnedRules.length === 0) && (
+            <div className="rule-empty">
+              <div style={{fontSize:28,marginBottom:8,opacity:0.4}}>⚡</div>
+              No rules yet — add one below or move an email to a different category
+            </div>
+          )}
+          {rules.map((rule, i) => (
+            <div key={rule.id || i} className="rule-item">
+              <span className="rule-cond">{COND_LABELS[rule.condition] || rule.condition}</span>
+              <span className="rule-val">{rule.value}</span>
+              <span className="rule-cat">{CAT_LABEL[rule.category] || rule.category}</span>
+              <span className="rule-pri">P{rule.priority}</span>
+              <button className="rule-del" onClick={() => onDelete(rule.id)} title="Delete rule">✕</button>
+            </div>
+          ))}
+          {learnedRules && learnedRules.length > 0 && (
+            <>
+              <div className="learned-section-label">Learned from corrections</div>
+              {learnedRules.map((rule, i) => (
+                <div key={rule.id || i} className="rule-item learned">
+                  <span className="learned-badge">✦ learned</span>
+                  <span className="rule-val">{rule.value}</span>
+                  <span className="rule-cat">{CAT_LABEL[rule.category] || rule.category}</span>
+                  {rule.count > 1 && <span className="rule-pri">×{rule.count}</span>}
+                  <button className="rule-del" onClick={() => onDeleteLearned(rule.id)} title="Forget rule">✕</button>
+                </div>
+              ))}
+            </>
+          )}
+
+          <div className="rule-form">
+            <div className="rule-form-label">New Rule</div>
+            <div className="rule-form-row">
+              <select className="rule-select" value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))}>
+                {Object.entries(COND_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+              <input
+                className="rule-input"
+                placeholder={form.condition === "sender_domain" ? "e.g. google.com" : form.condition === "sender_email" ? "e.g. boss@company.com" : "keyword"}
+                value={form.value}
+                onChange={e => { setError(""); setForm(f => ({ ...f, value: e.target.value })); }}
+                onKeyDown={e => e.key === "Enter" && submit()}
+              />
+            </div>
+            <div className="rule-form-row">
+              <select className="rule-select" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                {CAT_ORDER.map(c => <option key={c} value={c}>{CAT_LABEL[c]}</option>)}
+              </select>
+              <select className="rule-select" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: Number(e.target.value) }))}>
+                {[1,2,3,4,5].map(n => <option key={n} value={n}>Priority {n}</option>)}
+              </select>
+              <button className="rule-add-btn" onClick={submit} disabled={!form.value.trim()}>+ Add Rule</button>
+            </div>
+            {error && <div style={{fontSize:11,color:"#ff8585"}}>{error}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VipSendersModal = ({ vips, onClose, onAdd, onRemove }) => {
+  const [input, setInput] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const submit = () => {
+    const v = input.trim();
+    if (!v) { setError("Email or domain is required."); return; }
+    setError("");
+    onAdd(v);
+    setInput("");
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <div className="modal-title">VIP Senders</div>
+            <div className="modal-sub">Emails from VIPs are always surfaced first</div>
+          </div>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {vips.length === 0 && (
+            <div className="rule-empty">
+              <div style={{fontSize:28,marginBottom:8,opacity:0.4}}>★</div>
+              No VIPs yet — add one below
+            </div>
+          )}
+          {vips.map((v, i) => (
+            <div key={v.email || i} className="modal-vip-row">
+              <div className="vip-avatar" style={{width:34,height:34,fontSize:11,borderRadius:12}}>
+                {initialsOf(v.name || v.email)}
+              </div>
+              <div>
+                <div className="modal-vip-name">{v.name || v.email}</div>
+                <div className="modal-vip-meta">{v.role} · {v.email}</div>
+              </div>
+              <button className="rule-del" onClick={() => onRemove(v.email)} title="Remove VIP">✕</button>
+            </div>
+          ))}
+          <div className="rule-form">
+            <div className="rule-form-label">Add VIP</div>
+            <div className="rule-form-row">
+              <input
+                className="rule-input"
+                placeholder="email@domain.com or @domain.com"
+                value={input}
+                onChange={e => { setError(""); setInput(e.target.value); }}
+                onKeyDown={e => e.key === "Enter" && submit()}
+                autoFocus
+              />
+              <button className="rule-add-btn" onClick={submit} disabled={!input.trim()}>+ Add VIP</button>
+            </div>
+            {error && <div style={{fontSize:11,color:"#ff8585"}}>{error}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 window.ContextPane = ContextPane;
 </script>
 <script type="text/babel" data-presets="react">/* Command palette (⌘K) + Focus mode */
 
-const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetView, onToggleFocus }) => {
+const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetView }) => {
   const [q, setQ] = React.useState("");
   const [cursor, setCursor] = React.useState(0);
   const inputRef = React.useRef(null);
@@ -3248,7 +3742,6 @@ const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetV
   }, [open]);
 
   const commands = [
-    { id:"focus", group:"Actions", icon:"⚡", label:"Enter focus mode", meta:"Focus on priority emails", run: () => onToggleFocus() },
     { id:"v_inbox", group:"Navigation", icon:"📥", label:"Go to inbox", meta:"G then I", run: () => onSetView("inbox") },
     { id:"v_tasks", group:"Navigation", icon:"✓", label:"Go to tasks", meta:"G then T", run: () => onSetView("tasks") },
     { id:"v_vips", group:"Navigation", icon:"★", label:"Go to VIPs & follow-ups", meta:"", run: () => onSetView("vips") },
@@ -3338,95 +3831,7 @@ const CommandPalette = ({ open, onClose, emails, onSelectEmail, onAction, onSetV
   );
 };
 
-const FocusMode = ({ emails, onExit, onAction, onOpenDraft }) => {
-  const [idx, setIdx] = React.useState(0);
-  const items = emails.filter(e =>
-    e.category === "escalation" ||
-    e.category === "action_required" ||
-    e.vip ||
-    (e.category === "calendar" && e.reasons && e.reasons.some(r => /deadline/i.test(r)))
-  );
-  React.useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "ArrowRight" || e.key === "j") { setIdx(i => Math.min(items.length - 1, i + 1)); }
-      else if (e.key === "ArrowLeft" || e.key === "k") { setIdx(i => Math.max(0, i - 1)); }
-      else if (e.key === "Escape") onExit();
-      else if (e.key === "r") { onAction(items[idx].id, "resolve"); setIdx(i => Math.min(items.length - 2, i)); }
-      else if (e.key === "t") { onAction(items[idx].id, "trash"); setIdx(i => Math.min(items.length - 2, i)); }
-      else if (e.key === "e") { onOpenDraft(items[idx]); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [idx, items, onAction, onExit, onOpenDraft]);
-
-  if (!items.length) return (
-    <div className="focus-stage">
-      <div className="focus-head">
-        <div style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-dim)",letterSpacing:"0.08em",textTransform:"uppercase"}}>Focus mode</div>
-        <div className="focus-progress" />
-        <button className="thread-btn" onClick={onExit}>Exit (esc)</button>
-      </div>
-      <div className="focus-card-wrap">
-        <div className="focus-card" style={{textAlign:"center"}}>
-          <div style={{fontSize:32,marginBottom:12}}>🌿</div>
-          <div className="focus-subject">Inbox zero</div>
-          <div className="focus-body" style={{textAlign:"center"}}>Nothing critical right now. Take a break or check the full inbox.</div>
-          <button className="thread-btn primary" onClick={onExit} style={{margin:"0 auto"}}>Back to inbox</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const email = items[idx];
-  const thread = email.thread || [{ from: email.sender, text: email.preview, time: email.time }];
-
-  return (
-    <div className="focus-stage">
-      <div className="focus-head">
-        <div style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-dim)",letterSpacing:"0.08em",textTransform:"uppercase"}}>
-          Focus · {idx + 1} of {items.length}
-        </div>
-        <div className="focus-progress">
-          {items.map((_, i) => (
-            <div key={i} className={`focus-pip ${i < idx ? "done" : ""} ${i === idx ? "current" : ""}`} />
-          ))}
-        </div>
-        <button className="thread-btn" onClick={onExit}>Exit <span className="focus-kbd-hint">esc</span></button>
-      </div>
-
-      <div className="focus-card-wrap">
-        <div className="focus-card">
-          <div className="focus-from">
-            <div className="focus-avatar">{email.avatar}</div>
-            <div>
-              <div className="focus-from-name">{email.sender} {email.vip && <span style={{color:"oklch(0.85 0.15 80)"}}>★</span>}</div>
-              <div className="focus-from-meta">{email.email} · {email.time}</div>
-            </div>
-            <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-              <span className="thread-meta-pill" style={{"--c": CAT_VAR[email.category]}}>{CAT_LABEL[email.category]}</span>
-              {(email.reasons||[]).slice(0,2).map(r => (
-                <span key={r} className="thread-meta-pill" style={{"--c": "var(--fg-mute)"}}>{r}</span>
-              ))}
-            </div>
-          </div>
-          <div className="focus-subject">{email.subject}</div>
-          <div className="focus-body">{thread[0].text}</div>
-        </div>
-      </div>
-
-      <div className="focus-foot">
-        <button className="focus-foot-btn" onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}>← Prev <span className="focus-kbd-hint">k</span></button>
-        <button className="focus-foot-btn" onClick={() => { onAction(email.id, "trash"); }}>🗑 Trash <span className="focus-kbd-hint">t</span></button>
-        <button className="focus-foot-btn" onClick={() => { onOpenDraft(email); }}>✏️ Reply <span className="focus-kbd-hint">e</span></button>
-        <button className="focus-foot-btn primary" onClick={() => { onAction(email.id, "resolve"); }}>✓ Resolve <span className="focus-kbd-hint">r</span></button>
-        <button className="focus-foot-btn" onClick={() => setIdx(i => Math.min(items.length - 1, i + 1))} disabled={idx === items.length - 1}>Next → <span className="focus-kbd-hint">j</span></button>
-      </div>
-    </div>
-  );
-};
-
 window.CommandPalette = CommandPalette;
-window.FocusMode = FocusMode;
 </script>
 <script type="text/babel" data-presets="react">/* Main app — wires everything together */
 
@@ -3453,23 +3858,42 @@ const timeAgo = (iso) => {
   return d + "d ago";
 };
 
+const PERSONAL_DOMAINS = new Set([
+  "gmail.com","googlemail.com","yahoo.com","yahoo.ca","yahoo.co.uk",
+  "hotmail.com","outlook.com","outlook.ca","live.com","msn.com",
+  "icloud.com","me.com","mac.com","aol.com","protonmail.com",
+  "proton.me","fastmail.com","tutanota.com","zoho.com",
+]);
+
 const faviconFor = (emailAddr) => {
   if (!emailAddr) return null;
   const domain = String(emailAddr).split("@").pop().trim().toLowerCase();
   if (!domain || !domain.includes(".")) return null;
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+  if (PERSONAL_DOMAINS.has(domain)) return null;   // show initials for personal addresses
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
+};
+
+const cleanSenderName = (raw) => {
+  if (!raw) return raw;
+  let n = raw.trim();
+  n = n.replace(/^["'`]+|["'`]+$/g, '').trim();        // strip wrapping quotes (any position)
+  n = n.replace(/["'`]/g, '').trim();                   // strip any remaining stray quotes
+  n = n.replace(/\s*\[.*?\]\s*$/, '').trim();           // strip [bot], [noreply], etc.
+  n = n.replace(/\s*\((?:shared|noreply|no.reply|via\s+.+?)\)\s*$/i, '').trim();
+  n = n.replace(/\s+via\s+.+$/i, '').trim();            // strip "via SomePlatform"
+  return n || raw.trim();
 };
 
 const mapServerEmail = (e) => ({
   id: e.id,
-  sender: e.sender_name || e.sender_email || "(unknown)",
+  sender: cleanSenderName(e.sender_name) || e.sender_email || "(unknown)",
   email: e.sender_email || "",
   avatar: initialsOf(e.sender_name || e.sender_email),
   subject: e.subject || "(no subject)",
   preview: e.summary || "",
   time: timeAgo(e.date),
   timestamp: e.date ? new Date(e.date).getTime() : Date.now(),
-  category: e.category || "low_priority",
+  category: e.category || "digest",
   priority: e.priority || 1,
   unread: true,
   reasons: e.attentionReasons || [],
@@ -3500,7 +3924,7 @@ const mapVip = (s) => ({
 // To use a custom logo image (e.g. your company logo): paste its URL below.
 // Leave as "" to use the default "T" letter mark.
 // Example: const LOGO_URL = "https://example.com/your-logo.png";
-const LOGO_URL = "";
+const LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/d/d9/Questrade_logo.svg";
 // ───────────────────────────────────────────────────────────────────────────
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -3530,6 +3954,8 @@ const App = () => {
 
   // Core state
   const [emails, setEmails] = useState([]);
+  const [resolvedEmails, setResolvedEmails] = useState([]);
+  const [trashedEmails, setTrashedEmails] = useState([]);
   const [view, setView] = useState("inbox");
   const [activeTab, setActiveTab] = useState("all");
   const [activeCat, setActiveCat] = useState(null);
@@ -3543,11 +3969,25 @@ const App = () => {
   const [vips, setVips] = useState([]);
   const [followups, setFollowups] = useState([]);
   const [loadingInbox, setLoadingInbox] = useState(IS_APPS_SCRIPT);
+  const [classifying, setClassifying] = useState(IS_APPS_SCRIPT);
+  const [lastRefreshed, setLastRefreshed] = useState(null);
   const [user, setUser] = useState({ name: "Loading…", email: "" });
+  const [settings, setSettings] = useState({ smartLabels: true, emailLimit: 20 });
+  const emailLimitRef = useRef(20);
+  const [rules, setRules] = useState([]);
+  const [learnedRules, setLearnedRules] = useState([]);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [vipsOpen, setVipsOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [cmdOpen, setCmdOpen] = useState(false);
-  const [focusOpen, setFocusOpen] = useState(false);
   const [draft, setDraft] = useState({ text: "", tone: "Warm", streaming: false, chat: { history: [], thinking: false } });
+  const [nlResults, setNlResults] = useState(null);  // null=idle, array=results
+  const [searching, setSearching] = useState(false);
+  const [bundleMode, setBundleMode] = useState(false);
+  const [collapsedBundles, setCollapsedBundles] = useState(new Set());
+  const [teamBrief, setTeamBrief] = useState(null);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [clickupSettings, setClickupSettings] = useState({ apiKey: '', listId: '' });
 
   // Scenario switch resets list — removed (single scenario)
 
@@ -3561,16 +4001,14 @@ const App = () => {
   const refreshInbox = useCallback(() => {
     if (!IS_APPS_SCRIPT) return;
     setLoadingInbox(true);
-    gsRun("fetchInboxSnapshot")
-      .then(snapshot => {
-        const initial = (snapshot.emails || []).map(mapServerEmail);
-        setEmails(initial);
-        return gsRun("classifyInboxEmails", snapshot.emails);
-      })
+    gsRun("fetchInboxSnapshot", emailLimitRef.current)
+      .then(snapshot => gsRun("classifyInboxEmails", snapshot.emails))
       .then(classified => {
+        setClassifying(false);
         if (classified && classified.emails) {
           const mapped = classified.emails.map(mapServerEmail);
           setEmails(mapped);
+          gsRun("saveEmailSnapshotForSearch", classified.emails).catch(() => {});
           // After classification, ask the server for People API photos for
           // real contacts. These override the favicon fallback already set
           // in mapServerEmail.
@@ -3586,7 +4024,22 @@ const App = () => {
         }
       })
       .catch(e => pushToast("Inbox load failed: " + (e.message || e)))
-      .finally(() => setLoadingInbox(false));
+      .finally(() => { setLoadingInbox(false); setClassifying(false); setLastRefreshed(new Date()); });
+  }, [pushToast]);
+
+  const handleNlSearch = useCallback(async (q) => {
+    if (!q.trim() || !IS_APPS_SCRIPT) return;
+    setSearching(true);
+    setNlResults(null);
+    try {
+      const res = await gsRun("searchEmailsNL", q);
+      setNlResults(res.results || []);
+    } catch(e) {
+      pushToast("Search failed: " + (e.message || e));
+      setNlResults(null);
+    } finally {
+      setSearching(false);
+    }
   }, [pushToast]);
 
   useEffect(() => {
@@ -3596,6 +4049,10 @@ const App = () => {
     gsRun("getVipSenders").then(v => Array.isArray(v) && setVips(v.map(mapVip))).catch(() => {});
     gsRun("getFollowups").then(f => Array.isArray(f) && setFollowups(f)).catch(() => {});
     gsRun("getCurrentUser").then(u => u && u.email && setUser({ name: u.name || u.email.split("@")[0], email: u.email })).catch(() => {});
+    gsRun("getSmartLabelsEnabled").then(v => setSettings(s => ({ ...s, smartLabels: v !== false }))).catch(() => {});
+    gsRun("getRules").then(r => Array.isArray(r) && setRules(r)).catch(() => {});
+    gsRun("getLearnedRules").then(r => Array.isArray(r) && setLearnedRules(r)).catch(() => {});
+    gsRun("getClickUpSettings").then(s => s && setClickupSettings(s)).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -3647,9 +4104,10 @@ const App = () => {
     inbox: emails.length,
     tasks: tasks.filter(t => !t.done).length,
     vipFollow: vips.length + followups.length,
-    resolved: 0,
-    trashed: 0,
-  }), [emails, tasks, vips, followups]);
+    resolved: resolvedEmails.length,
+    trashed: trashedEmails.length,
+    team: teamBrief?.members?.length || 0,
+  }), [emails, tasks, vips, followups, resolvedEmails, trashedEmails, teamBrief]);
 
   // Toast helpers — pushToast defined above
 
@@ -3661,6 +4119,8 @@ const App = () => {
 
     setTimeout(() => {
       setEmails(prev => prev.filter(e => !idSet.has(e.id)));
+      if (action === "resolve") setResolvedEmails(prev => [...affected.map(e => ({...e, resolvedAt: Date.now()})), ...prev]);
+      if (action === "trash")   setTrashedEmails(prev =>  [...affected.map(e => ({...e, trashedAt:  Date.now()})), ...prev]);
       setDismissingIds(prev => {
         const next = new Set(prev);
         idSet.forEach(id => next.delete(id));
@@ -3678,7 +4138,11 @@ const App = () => {
     const n = affected.length;
     pushToast(
       `${verb} ${n} email${n === 1 ? "" : "s"}`,
-      () => { setEmails(prev => [...affected, ...prev]); }
+      () => {
+        setEmails(prev => [...affected, ...prev]);
+        if (action === "resolve") setResolvedEmails(prev => prev.filter(e => !idSet.has(e.id)));
+        if (action === "trash")   setTrashedEmails(prev =>  prev.filter(e => !idSet.has(e.id)));
+      }
     );
 
     // Server-side
@@ -3687,6 +4151,16 @@ const App = () => {
       if (fn) idSet.forEach(id => gsRun(fn, id).catch(e => pushToast("Server: " + (e.message||e))));
     }
   }, [emails, selectedId, pushToast]);
+
+  const restoreEmail = useCallback((id, fromList) => {
+    const src = fromList === "resolved" ? resolvedEmails : trashedEmails;
+    const email = src.find(e => e.id === id);
+    if (!email) return;
+    if (fromList === "resolved") setResolvedEmails(prev => prev.filter(e => e.id !== id));
+    else setTrashedEmails(prev => prev.filter(e => e.id !== id));
+    setEmails(prev => [email, ...prev]);
+    pushToast("Returned to inbox");
+  }, [resolvedEmails, trashedEmails, pushToast]);
 
   // Batch select
   const onCheck = useCallback((id, shouldCheck, shift) => {
@@ -3863,6 +4337,125 @@ const App = () => {
     }
   }, [pushToast]);
 
+  const addFollowup = useCallback(({ to, subject, hours }) => {
+    const id = "manual_" + Date.now();
+    const due = new Date(Date.now() + Number(hours || 24) * 3600000);
+    const entry = { id, to, subject, sent: "now", due: due.toLocaleDateString([], {month:"short",day:"numeric"}), overdue: false };
+    setFollowups(prev => [entry, ...prev]);
+    if (IS_APPS_SCRIPT) {
+      gsRun("addFollowup", id, subject, to, to, new Date().toISOString(), hours || 24)
+        .catch(e => pushToast("Track failed: " + (e.message || e)));
+    }
+    pushToast("Follow-up tracked");
+  }, [pushToast]);
+
+  const removeFollowup = useCallback((id) => {
+    setFollowups(prev => prev.filter(f => f.id !== id));
+    if (IS_APPS_SCRIPT) gsRun("removeFollowup", id).catch(() => {});
+  }, []);
+
+  const onSettingsChange = useCallback((key, val) => {
+    setSettings(s => ({ ...s, [key]: val }));
+    if (key === "emailLimit") {
+      emailLimitRef.current = val;
+      refreshInbox();
+      return;
+    }
+    if (!IS_APPS_SCRIPT) return;
+    if (key === "smartLabels") gsRun("setSmartLabelsEnabled", val).catch(() => {});
+  }, [refreshInbox]);
+
+  const onClearHistory = useCallback(() => {
+    setResolvedEmails([]);
+    setTrashedEmails([]);
+    if (IS_APPS_SCRIPT) gsRun("clearDismissedEmails").catch(() => {});
+    pushToast("History cleared");
+  }, [pushToast]);
+
+  const addRule = useCallback((rule) => {
+    if (IS_APPS_SCRIPT) {
+      gsRun("addRule", rule)
+        .then(r => Array.isArray(r) && setRules(r))
+        .catch(e => pushToast("Add rule failed: " + (e.message || e)));
+    } else {
+      setRules(prev => [...prev, { ...rule, id: "r_" + Date.now() }]);
+    }
+    pushToast("Rule added");
+  }, [pushToast]);
+
+  const deleteRule = useCallback((id) => {
+    setRules(prev => prev.filter(r => r.id !== id));
+    if (IS_APPS_SCRIPT) gsRun("deleteRule", id).catch(e => pushToast("Delete rule failed: " + (e.message || e)));
+  }, [pushToast]);
+
+  const recategorize = useCallback((email, newCategory) => {
+    setEmails(prev => prev.map(e => e.id === email.id ? { ...e, category: newCategory } : e));
+    pushToast("Moved to " + (CAT_LABEL[newCategory] || newCategory) + " · rule learned");
+    if (IS_APPS_SCRIPT) {
+      gsRun("learnFromCorrection", email.email, email.sender, email.subject, newCategory)
+        .then(learned => Array.isArray(learned) && setLearnedRules(learned))
+        .catch(() => {});
+    } else {
+      setLearnedRules(prev => {
+        const exists = prev.find(r => r.condition === "sender_email" && r.value === email.email);
+        if (exists) return prev.map(r => r === exists ? { ...r, category: newCategory, count: (r.count || 1) + 1 } : r);
+        return [...prev, { id: "lr_" + Date.now(), condition: "sender_email", value: email.email, category: newCategory, priority: 3, learned: true, learnedFrom: email.subject, count: 1 }];
+      });
+    }
+  }, [pushToast]);
+
+  const deleteLearnedRule = useCallback((id) => {
+    setLearnedRules(prev => prev.filter(r => r.id !== id));
+    if (IS_APPS_SCRIPT) gsRun("deleteLearnedRule", id).catch(() => {});
+  }, []);
+
+  const createCalEvent = useCallback(async (email) => {
+    if (!IS_APPS_SCRIPT) { pushToast("Calendar creation only works in Gmail"); return; }
+    try {
+      const result = await gsRun("createCalendarEventFromEmail", email.id);
+      pushToast(`📅 Added: ${result.title} · ${result.date} ${result.startTime}`);
+    } catch(e) {
+      pushToast("Calendar error: " + (e.message || e));
+    }
+  }, [pushToast]);
+
+  const addTaskFromEmail = useCallback(async (email) => {
+    if (!IS_APPS_SCRIPT) { pushToast("Task extraction only works in Gmail"); return; }
+    try {
+      const newTasks = await gsRun("addTaskFromEmail", email.id);
+      if (!newTasks || !newTasks.length) { pushToast("No action items found in this email"); return; }
+      setTasks(prev => [...newTasks.map(mapTask), ...prev]);
+      pushToast(`✓ ${newTasks.length} task${newTasks.length === 1 ? "" : "s"} added`);
+    } catch(e) {
+      pushToast("Task error: " + (e.message || e));
+    }
+  }, [pushToast]);
+
+  const loadTeamBrief = useCallback(async () => {
+    if (!IS_APPS_SCRIPT) { pushToast("Team Brief requires Gmail context"); return; }
+    setTeamLoading(true);
+    try {
+      const result = await gsRun("getTeamBrief");
+      setTeamBrief(result);
+    } catch(e) {
+      pushToast("Team Brief error: " + (e.message || e));
+    } finally {
+      setTeamLoading(false);
+    }
+  }, [pushToast]);
+
+  const saveClickupSettings = useCallback(async (apiKey, listId) => {
+    if (IS_APPS_SCRIPT) await gsRun("saveClickUpSettings", apiKey, listId).catch(() => {});
+    setClickupSettings({ apiKey, listId });
+  }, []);
+
+  const createCheckInDraft = useCallback((toEmail, toName, subject, body) => {
+    if (!IS_APPS_SCRIPT) { pushToast("Draft creation requires Gmail context"); return; }
+    gsRun("createCheckInDraft", toEmail, toName, subject, body)
+      .then(() => pushToast("✉ Check-in draft created in Gmail"))
+      .catch(e => pushToast("Draft failed: " + (e.message || e)));
+  }, [pushToast]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
@@ -3878,10 +4471,8 @@ const App = () => {
       if (inField) return;
 
       if (e.key === "?") { setCmdOpen(true); return; }
-      if (e.altKey && e.key.toLowerCase() === "f") { e.preventDefault(); setFocusOpen(true); return; }
 
       // List navigation
-      if (focusOpen) return;
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
         const i = filtered.findIndex(x => x.id === selectedId);
@@ -3897,7 +4488,6 @@ const App = () => {
       if (selectedId) {
         if (e.key === "r") { doAction(selectedId, "resolve"); }
         if (e.key === "t") { doAction(selectedId, "trash"); }
-        if (e.key === "s") { doAction(selectedId, "snooze"); }
         if (e.key === "e") {
           const em = emails.find(x => x.id === selectedId);
           if (em) openDraft(em);
@@ -3915,7 +4505,7 @@ const App = () => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [filtered, selectedId, doAction, openDraft, emails, focusOpen]);
+  }, [filtered, selectedId, doAction, openDraft, emails]);
 
   // Auto-select first item on mount
   useEffect(() => {
@@ -3924,30 +4514,6 @@ const App = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // ---- Sub-views ----
-  if (focusOpen) {
-    return (
-      <div className="shell focus">
-        <FocusMode
-          emails={emails}
-          onExit={() => setFocusOpen(false)}
-          onAction={doAction}
-          onOpenDraft={openDraft}
-        />
-        <CommandPalette
-          open={cmdOpen}
-          onClose={() => setCmdOpen(false)}
-          emails={emails}
-          onSelectEmail={(id) => { setSelectedId(id); setFocusOpen(false); }}
-          onAction={doAction}
-          onSetView={(v) => { setView(v); setFocusOpen(false); }}
-          onToggleFocus={() => setFocusOpen(true)}
-        />
-        <ToastWrap toasts={toasts} />
-      </div>
-    );
-  }
 
   // ---- Build list groups (when activeTab=all) ----
   const sectioned = activeTab === "all" && !search;
@@ -3958,126 +4524,247 @@ const App = () => {
       })).filter(g => g.items.length > 0)
     : [{ cat: null, items: filtered }];
 
+  // ---- NL search result rows (reuse existing email objects + reason) ----
+  const nlEmailsToShow = useMemo(() => {
+    if (!nlResults) return [];
+    return nlResults.map(r => {
+      const existing = emails.find(e => e.id === r.id);
+      if (existing) return { ...existing, reason: r.reason };
+      return {
+        id: r.id, sender: r.from, subject: r.subject, preview: r.summary,
+        time: timeAgo(r.date), category: r.category || "digest",
+        avatar: initialsOf(r.from), photo: faviconFor(r.email),
+        vip: false, reasons: [], reason: r.reason,
+      };
+    });
+  }, [nlResults, emails]);
+
+  // ---- Bundle groups (by sender) ----
+  const bundles = useMemo(() => {
+    if (!bundleMode || nlResults !== null) return null;
+    const groups = {};
+    filtered.forEach(e => {
+      const key = e.sender || "Unknown";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(e);
+    });
+    return Object.entries(groups)
+      .sort((a, b) => b[1].length - a[1].length)
+      .map(([name, items]) => ({ name, items }));
+  }, [bundleMode, filtered, nlResults]);
+
+  const toggleBundle = useCallback((name) => {
+    setCollapsedBundles(prev => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
+  }, []);
+
+
   return (
-    <div className={`shell ${(view === "tasks" || view === "vips" || view === "resolved" || view === "trashed") ? "no-right" : ""}`}>
+    <div className={`shell ${(view === "tasks" || view === "team" || view === "vips" || view === "resolved" || view === "trashed") ? "no-right" : ""}`}>
       <Rail
         view={view}
         setView={(v) => {
           setView(v);
           if (v === "tasks") setContextTab("tasks");
-          else if (v === "vips") setContextTab("tracker");
           else setContextTab("thread");
           if (v === "inbox") setActiveTab("all");
         }}
         totals={totals}
         user={user}
         logoUrl={LOGO_URL}
+        settings={settings}
+        onSettingsChange={onSettingsChange}
+        onClearHistory={onClearHistory}
+        onOpenRules={() => setRulesOpen(true)}
+        onOpenVips={() => setVipsOpen(true)}
+        vips={vips}
       />
 
       <main className="main">
         <header className="topbar">
           <div>
             <div className="topbar-title">
-              {view === "inbox" && "Inbox"}
+              {view === "inbox" && "Inbox Triage"}
               {view === "tasks" && "Tasks"}
+              {view === "team" && "Team Brief"}
               {view === "vips" && "VIPs & follow-ups"}
               {view === "resolved" && "Resolved"}
               {view === "trashed" && "Trashed"}
             </div>
             <div className="topbar-sub">
-              {loadingInbox
-                ? "Fetching inbox…"
-                : `${emails.length} email${emails.length === 1 ? "" : "s"}`}
+              {loadingInbox ? "Fetching inbox…" : (
+                view === "inbox" ? (
+                  <span className="topbar-limit">
+                    Load Emails:
+                    <select value={settings.emailLimit} onChange={e => onSettingsChange("emailLimit", Number(e.target.value))}>
+                      {[20, 30, 40, 50].map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </span>
+                ) : view === "team" ? "ClickUp · Claude analysis" : `${emails.length} email${emails.length === 1 ? "" : "s"}`
+              )}
             </div>
           </div>
 
           <div className="search" style={{marginLeft:"auto"}}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="6" cy="6" r="4.5" /><path d="M9.5 9.5L12 12" strokeLinecap="round" />
-            </svg>
+            <button
+              className={`search-icon-btn${searching ? " searching" : ""}`}
+              title="AI search (Enter)"
+              onClick={() => search.trim() && handleNlSearch(search)}
+            >
+              {searching
+                ? <svg width="14" height="14" viewBox="-1 -1 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" overflow="visible"><path d="M12 4a5 5 0 11-1.5-3.5M12 1v3h-3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                : <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="4.5"/><path d="M9.5 9.5L12 12" strokeLinecap="round"/></svg>
+              }
+            </button>
             <input
-              placeholder="Search inbox…"
+              placeholder="Search or ask AI… (Enter)"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); if (nlResults !== null) setNlResults(null); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && search.trim()) handleNlSearch(search); }}
             />
-            {search && (
+            {(search || nlResults !== null) && (
               <button
-                onClick={() => setSearch("")}
-                title="Clear search"
+                onClick={() => { setSearch(""); setNlResults(null); }}
+                title="Clear"
                 style={{background:"none",border:"none",color:"var(--fg-dim)",cursor:"pointer",fontSize:18,lineHeight:1,padding:"0 4px"}}
               >×</button>
             )}
-            <span className="search-kbd">⌘K</span>
+            {!search && !nlResults && <span className="search-kbd">⌘K</span>}
           </div>
 
-          <button className="icon-btn" title="Refresh inbox" onClick={refreshInbox} disabled={loadingInbox} style={loadingInbox ? {opacity:0.5} : {}}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" style={loadingInbox?{animation:"spin 1s linear infinite"}:{}}>
+          <button className="icon-btn" title={lastRefreshed ? `Last refreshed ${lastRefreshed.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}` : "Refresh inbox"} onClick={refreshInbox} disabled={loadingInbox} style={loadingInbox ? {opacity:0.5} : {}}>
+            <svg width="14" height="14" viewBox="-1 -1 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" overflow="visible" style={loadingInbox?{animation:"spin 1s linear infinite",transformOrigin:"center"}:{}}>
               <path d="M12 4a5 5 0 11-1.5-3.5M12 1v3h-3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <button className="icon-btn" title="Focus mode (alt-F)" onClick={() => setFocusOpen(true)}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="7" cy="7" r="5.5"/><circle cx="7" cy="7" r="2"/>
-            </svg>
-          </button>
+          {view === "inbox" && (
+            <button
+              className={`bundle-btn${bundleMode ? " active" : ""}`}
+              title="Group emails by sender"
+              onClick={() => setBundleMode(m => !m)}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="1" y="1" width="4" height="4" rx="1"/><rect x="7" y="1" width="4" height="4" rx="1"/>
+                <rect x="1" y="7" width="4" height="4" rx="1"/><rect x="7" y="7" width="4" height="4" rx="1"/>
+              </svg>
+              Bundle
+            </button>
+          )}
         </header>
 
         {view === "inbox" && (
           <>
-            <Stats emails={emails} activeCat={activeCat} setActiveCat={setActiveCat} />
             <AttentionBanner
               emails={emails}
               style={tw.attentionStyle}
-              onClick={() => setFocusOpen(true)}
+              loading={classifying}
             />
+            <Stats emails={emails} activeCat={activeCat} setActiveCat={setActiveCat} />
             {checked.size > 0 && (
               <div className="batch-bar">
                 <span className="batch-count">{checked.size} selected</span>
                 <button className="batch-btn primary" onClick={() => doAction(Array.from(checked), "resolve")}>✓ Resolve all</button>
-                <button className="batch-btn" onClick={() => doAction(Array.from(checked), "snooze")}>☾ Snooze</button>
                 <button className="batch-btn" onClick={() => doAction(Array.from(checked), "trash")}>🗑 Trash</button>
                 <span className="batch-spacer" />
                 <button className="batch-btn" onClick={() => setChecked(new Set())}>Clear</button>
               </div>
             )}
 
+            {nlResults !== null && (
+              <div className="nl-search-header">
+                <span>AI results for <em>"{search}"</em> · {nlEmailsToShow.length} match{nlEmailsToShow.length !== 1 ? "es" : ""}</span>
+                <button onClick={() => { setNlResults(null); setSearch(""); }}>× Clear</button>
+              </div>
+            )}
+
             <div className="list">
-              {filtered.length === 0 && (
-                <div className="list-empty">
-                  <div className="list-empty-icon">📭</div>
-                  <div className="list-empty-title">Nothing here</div>
-                  <div className="list-empty-sub">{search ? `No matches for "${search}"` : "Try a different filter"}</div>
-                  {search && (
-                    <button
-                      className="thread-btn"
-                      onClick={() => setSearch("")}
-                      style={{marginTop:18, display:"inline-flex"}}
-                    >× Clear search</button>
-                  )}
-                </div>
-              )}
-              {sectionedGroups.map((g, gi) => (
-                <React.Fragment key={g.cat || "all"}>
-                  {g.cat && (
-                    <div className="list-section-label">
-                      {CAT_LABEL[g.cat]} · {g.items.length}
+              {nlResults !== null ? (
+                /* ---- AI search results ---- */
+                nlEmailsToShow.length === 0 ? (
+                  <div className="list-empty">
+                    <div className="list-empty-icon">🔍</div>
+                    <div className="list-empty-title">No matches found</div>
+                    <div className="list-empty-sub">Try rephrasing your query</div>
+                    <button className="thread-btn" onClick={() => { setNlResults(null); setSearch(""); }} style={{marginTop:18,display:"inline-flex"}}>× Clear search</button>
+                  </div>
+                ) : nlEmailsToShow.map(email => (
+                  <EmailRow key={email.id} email={email}
+                    selected={selectedId === email.id} checked={checked.has(email.id)}
+                    dismissing={dismissingIds.has(email.id)} batchMode={checked.size > 0}
+                    onSelect={(id) => { setSelectedId(id); setContextTab("thread"); }}
+                    onCheck={onCheck} onAction={doAction}
+                  />
+                ))
+              ) : bundles !== null ? (
+                /* ---- Bundle / entity groups ---- */
+                bundles.length === 0 ? (
+                  <div className="list-empty">
+                    <div className="list-empty-icon">📭</div>
+                    <div className="list-empty-title">No emails to bundle</div>
+                  </div>
+                ) : bundles.map(bundle => {
+                  const collapsed = collapsedBundles.has(bundle.name);
+                  // Use the already-computed photo from the first item (handles PERSONAL_DOMAINS logic internally)
+                  const representativePhoto = bundle.items[0]?.photo || null;
+                  const isFavicon = representativePhoto && representativePhoto.includes("s2/favicons");
+                  return (
+                    <React.Fragment key={bundle.name}>
+                      <div className="bundle-header" onClick={() => toggleBundle(bundle.name)}>
+                        {representativePhoto
+                          ? <img className="bundle-favicon" src={representativePhoto}
+                              style={isFavicon ? {objectFit:"contain",padding:2,background:"rgba(255,255,255,0.9)"} : {objectFit:"cover"}}
+                              alt="" onError={e => { e.currentTarget.style.display="none"; }}
+                            />
+                          : <div className="bundle-initials">{(bundle.name[0]||"?").toUpperCase()}</div>
+                        }
+                        <span className="bundle-name">{bundle.name}</span>
+                        <span className="bundle-count">{bundle.items.length}</span>
+                        <span className={`bundle-chevron${collapsed ? "" : " open"}`}>›</span>
+                      </div>
+                      {!collapsed && bundle.items.map(email => (
+                        <EmailRow key={email.id} email={email}
+                          selected={selectedId === email.id} checked={checked.has(email.id)}
+                          dismissing={dismissingIds.has(email.id)} batchMode={checked.size > 0}
+                          onSelect={(id) => { setSelectedId(id); setContextTab("thread"); }}
+                          onCheck={onCheck} onAction={doAction}
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                /* ---- Normal inbox list ---- */
+                <>
+                  {!classifying && filtered.length === 0 && (
+                    <div className="list-empty">
+                      <div className="list-empty-icon">📭</div>
+                      <div className="list-empty-title">You're all caught up!</div>
+                      <div className="list-empty-sub">{search ? `No matches for "${search}"` : "Check back after your next sync"}</div>
+                      {search && (
+                        <button className="thread-btn" onClick={() => setSearch("")} style={{marginTop:18,display:"inline-flex"}}>× Clear search</button>
+                      )}
                     </div>
                   )}
-                  {g.items.map(email => (
-                    <EmailRow
-                      key={email.id}
-                      email={email}
-                      selected={selectedId === email.id}
-                      checked={checked.has(email.id)}
-                      dismissing={dismissingIds.has(email.id)}
-                      batchMode={checked.size > 0}
-                      onSelect={(id) => { setSelectedId(id); setContextTab("thread"); }}
-                      onCheck={onCheck}
-                      onAction={doAction}
-                    />
+                  {!classifying && sectionedGroups.map((g) => (
+                    <React.Fragment key={g.cat || "all"}>
+                      {g.cat && (
+                        <div className="list-section-label">{CAT_LABEL[g.cat]} · {g.items.length}</div>
+                      )}
+                      {g.items.map(email => (
+                        <EmailRow key={email.id} email={email}
+                          selected={selectedId === email.id} checked={checked.has(email.id)}
+                          dismissing={dismissingIds.has(email.id)} batchMode={checked.size > 0}
+                          onSelect={(id) => { setSelectedId(id); setContextTab("thread"); }}
+                          onCheck={onCheck} onAction={doAction}
+                        />
+                      ))}
+                    </React.Fragment>
                   ))}
-                </React.Fragment>
-              ))}
+                </>
+              )}
             </div>
           </>
         )}
@@ -4088,19 +4775,55 @@ const App = () => {
           </div>
         )}
 
+        {view === "team" && (
+          <div className="list" style={{padding:"18px"}}>
+            <TeamPane
+              brief={teamBrief}
+              loading={teamLoading}
+              onRefresh={loadTeamBrief}
+              settings={clickupSettings}
+              onSaveSettings={saveClickupSettings}
+              onDraftEmail={createCheckInDraft}
+            />
+          </div>
+        )}
+
         {view === "vips" && (
           <div className="list" style={{padding:"18px"}}>
             <TrackerFullView vips={vips} followups={followups} />
           </div>
         )}
 
-        {(view === "resolved" || view === "trashed") && (
-          <div className="list-empty" style={{padding:"80px 20px"}}>
-            <div className="list-empty-icon">{view === "resolved" ? "✓" : "🗑"}</div>
-            <div className="list-empty-title">No {view} items in this session</div>
-            <div className="list-empty-sub">Resolve or trash emails to see them here</div>
-          </div>
-        )}
+        {(view === "resolved" || view === "trashed") && (() => {
+          const list = view === "resolved" ? resolvedEmails : trashedEmails;
+          if (!list.length) return (
+            <div className="list-empty" style={{padding:"80px 20px"}}>
+              <div className="list-empty-icon">{view === "resolved" ? "✓" : "🗑"}</div>
+              <div className="list-empty-title">No {view} items in this session</div>
+              <div className="list-empty-sub">{view === "resolved" ? "Resolve or send replies to emails to see them here" : "Trash emails to see them here"}</div>
+            </div>
+          );
+          return (
+            <div className="list">
+              <div className="list-section-label">{view === "resolved" ? "Resolved" : "Trashed"} · {list.length}</div>
+              {list.map(email => (
+                <EmailRow
+                  key={email.id}
+                  email={email}
+                  selected={false}
+                  checked={false}
+                  dismissing={false}
+                  batchMode={false}
+                  restoreMode={true}
+                  onSelect={() => {}}
+                  onCheck={() => {}}
+                  onAction={() => {}}
+                  onRestore={(id) => restoreEmail(id, view)}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </main>
 
       {view === "inbox" && (
@@ -4110,13 +4833,11 @@ const App = () => {
           selectedEmail={selectedEmail}
           onResolve={(id) => doAction(id, "resolve")}
           onTrash={(id) => doAction(id, "trash")}
-          onSnooze={(id) => doAction(id, "snooze")}
+          onRecategorize={recategorize}
+          onCreateCalEvent={createCalEvent}
+          onAddTask={addTaskFromEmail}
           tasks={tasks}
           toggleTask={toggleTask}
-          vips={vips}
-          followups={followups}
-          onAddVip={addVip}
-          onRemoveVip={removeVip}
           draftState={draft}
           onOpenDraft={openDraft}
           onUpdateDraft={(text) => setDraft(d => ({ ...d, text, streaming: false }))}
@@ -4129,6 +4850,26 @@ const App = () => {
         />
       )}
 
+      {rulesOpen && (
+        <CustomRulesModal
+          rules={rules}
+          onClose={() => setRulesOpen(false)}
+          onAdd={addRule}
+          onDelete={deleteRule}
+          learnedRules={learnedRules}
+          onDeleteLearned={deleteLearnedRule}
+        />
+      )}
+
+      {vipsOpen && (
+        <VipSendersModal
+          vips={vips}
+          onClose={() => setVipsOpen(false)}
+          onAdd={addVip}
+          onRemove={removeVip}
+        />
+      )}
+
       <CommandPalette
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
@@ -4136,7 +4877,6 @@ const App = () => {
         onSelectEmail={(id) => { setSelectedId(id); setView("inbox"); setContextTab("thread"); }}
         onAction={doAction}
         onSetView={setView}
-        onToggleFocus={() => setFocusOpen(true)}
       />
 
       <ToastWrap toasts={toasts} />
@@ -4217,7 +4957,6 @@ const TrackerFullView = ({ vips, followups }) => (
             <div className="vip-name">{v.name}</div>
             <div className="vip-meta">{v.role} · {v.email}</div>
           </div>
-          <span className="followup-due">{v.last}</span>
         </div>
       ))}
     </div>
