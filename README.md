@@ -1,2 +1,2 @@
-# new_email_triage
-for questrade internal add-on
+# QuestFlow
+Questrade internal gmail add-on tool
