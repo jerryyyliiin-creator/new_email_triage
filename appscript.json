@@ -26,8 +26,8 @@
   },
   "addOns": {
     "common": {
-      "name": "Inbox Triage",
-      "logoUrl": "https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_48dp.png",
+      "name": "QuestFlow",
+      "logoUrl": "https://forex-brokers.ca/wp-content/uploads/2020/04/questrade-broker-forex-canada.png",
       "homepageTrigger": {
         "runFunction": "onHomepage"
       }
