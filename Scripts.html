@@ -1,0 +1,88 @@
+
+<script>
+// ─── Slack DM helpers — QuestFlow frontend ────────────────────────────────────
+// Called from React via window.sendViaSlack(email, name, cardId)
+// Never touches the token — all auth lives in Slack.gs on the server side.
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function () {
+  // Map cardId → { btn, status } so we can update the right card's UI
+  var _cards = {};
+
+  /**
+   * Register a card's UI elements so sendViaSlack can update them.
+   * Call this once per rendered card, e.g. after React renders the button.
+   *   cardId  — unique string (email.id works well)
+   *   btnEl   — the <button> DOM element
+   *   statusEl — a <span> or <div> to receive status text
+   */
+  window.registerSlackCard = function (cardId, btnEl, statusEl) {
+    _cards[cardId] = { btn: btnEl, status: statusEl };
+  };
+
+  /**
+   * Send a Slack DM to personEmail with message content.
+   * cardId is used purely to update the matching button/status UI.
+   *
+   * If cardId is omitted or the card was not registered, the function still
+   * sends — it just skips the DOM updates.
+   *
+   * Returns a Promise that resolves to { ok, name } or rejects with Error.
+   */
+  window.sendViaSlack = function (personEmail, personName, message, cardId) {
+    var card = _cards[cardId] || null;
+
+    // ── Validate ──────────────────────────────────────────────────────────────
+    if (!personEmail || !String(personEmail).trim()) {
+      _setStatus(card, "error", "No recipient email.");
+      return Promise.reject(new Error("No recipient email."));
+    }
+    if (!message || !String(message).trim()) {
+      _setStatus(card, "error", "Please enter a message before sending.");
+      return Promise.reject(new Error("Empty message."));
+    }
+
+    // ── Lock UI ───────────────────────────────────────────────────────────────
+    _setLoading(card, true);
+    _setStatus(card, "info", "Sending…");
+
+    // ── Call server ───────────────────────────────────────────────────────────
+    return new Promise(function (resolve, reject) {
+      google.script.run
+        .withSuccessHandler(function (result) {
+          _setLoading(card, false);
+          var displayName = (result && result.name) ? result.name : (personName || personEmail);
+          _setStatus(card, "success", "Sent to " + displayName + " on Slack");
+          setTimeout(function () { _setStatus(card, "", ""); }, 6000);
+          resolve(result);
+        })
+        .withFailureHandler(function (err) {
+          _setLoading(card, false);
+          var msg = (err && err.message) ? err.message : String(err || "Unknown error");
+          _setStatus(card, "error", msg);
+          reject(new Error(msg));
+        })
+        .sendSlackMessageToPerson({
+          personEmail: String(personEmail).trim(),
+          personName:  String(personName  || "").trim(),
+          message:     String(message).trim(),
+        });
+    });
+  };
+
+  // ── Internal helpers ────────────────────────────────────────────────────────
+
+  function _setLoading(card, isLoading) {
+    if (!card || !card.btn) return;
+    card.btn.disabled = isLoading;
+    card.btn.setAttribute("aria-busy", isLoading ? "true" : "false");
+  }
+
+  function _setStatus(card, type, text) {
+    if (!card || !card.status) return;
+    var el = card.status;
+    el.textContent = text;
+    el.className = "slack-send-status" + (type ? " slack-status-" + type : "");
+  }
+}());
+</script>
