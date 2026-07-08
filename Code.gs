@@ -2538,7 +2538,7 @@ function getTeamBrief(listId) {
   });
 
   var members = Object.values(memberMap).filter(function(m) {
-    return m.stuckTasks.length > 0;
+    return m.allTasks.length > 0;
   });
 
   if (!members.length) return { members: [], allClear: true };
